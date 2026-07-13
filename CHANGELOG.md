@@ -6,7 +6,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added (installability + chain-safety)
+_Nothing yet._
+
+## [1.1.0] — 2026-07-13
+
+### Added
+- **Social & Friend Bets** — a new major capability in `SKILL.md`. Turns a
+  natural-language friend/group wager (e.g. "bet $100 my friend Tony loses $100
+  today on memes") into structured terms (condition, amount, parties, resolution
+  criteria, deadline, source), writes a fair and verifiable resolution statement,
+  and suggests the best execution path: a real custom market (Polymarket /
+  Meridian Predict / Hunch) where one exists, otherwise a peer-to-peer escrow via
+  BankrBot wallet tools (escrow contract, multisig, or simple conditional
+  transfer). Runs the full 7 safety gates — confirmation required before any funds
+  move — and tracks/auto-settles on resolution. Includes a dedicated section,
+  example commands, and edge cases.
 - **`catalog.json`** — required BankrBot discovery metadata (slug, provider,
   logo, install command); without it the skill is excluded from the catalog.
 - **`logo.svg`** — square brand mark.
@@ -17,7 +31,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Validator now checks `catalog.json`; README documents the real install routes
   (registry PR or `npx skills add`), correcting the earlier mention-a-repo myth.
 
-### Changed (grounded co-pilot rework)
+### Changed
 - Reframed PolyRobin as a **decision co-pilot / behavior spec on top of BankrBot's
   existing rails** — explicitly not executable code and not an autonomous trader.
 - Execution scope made realistic: Polymarket betting and Robinhood Chain tokenized
@@ -27,9 +41,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Integration Hooks split into "rails BankrBot already supports" vs "PolyRobin's
   own analysis layer".
 - Config restructured to decision parameters only (`venues` + `rails`), no keys.
-- Added `bankrbot` tag.
-
-### Changed (earlier iterations)
+- Added `bankrbot`, `social-bets`, and `friend-bets` tags.
 - Reworked the skill around a dual-venue model with **Robinhood Chain as a
   first-class home venue** (Meridian Predict + tokenized event markets)
   alongside Polymarket.
@@ -40,13 +52,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   separate emergency `pause`.
 - Bridging now always routes funds **into Robinhood Chain** with optimal routing
   (no fixed source chain).
-- New section structure: Overview, Safety Model, Supported Markets, Example
-  Commands (Discovery / Analysis / Trading / Monitoring / Hedging & Bridging),
-  Integration Hooks, Edge Cases & Risk Handling, Auditability & Transparency.
 - Added Chainlink oracle integration and auto-claiming on resolution.
-- Updated sample config and validator to match the new structure.
-
-### Added
 - Repository scaffolding: sample config, CI validation, security policy,
   contribution guide, issue/PR templates.
 
@@ -68,5 +74,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Full auditability via per-decision Rationale Cards.
 - Professional `README.md` and MIT `LICENSE`.
 
-[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/PhantomCapAI/PolyRobin/releases/tag/v1.0.0
+[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/280267b...HEAD
+[1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/17c681a...280267b
+[1.0.0]: https://github.com/PhantomCapAI/PolyRobin/commit/17c681a
