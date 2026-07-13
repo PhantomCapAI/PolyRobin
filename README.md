@@ -20,6 +20,7 @@ trade requires your explicit confirmation.
 ## Table of Contents
 
 - [What it is](#what-it-is)
+- [How you use it](#how-you-use-it)
 - [🛡️ Safety Cheat Sheet](#-safety-cheat-sheet)
 - [Supported Markets](#supported-markets)
 - [Example Flows](#example-flows)
@@ -47,6 +48,24 @@ trade requires your explicit confirmation.
 BankrBot's live RH-Chain rails. Robinhood Chain / **Meridian Predict** prediction
 markets are **discovery + analysis only for now** (new venue) — PolyRobin falls
 back to Polymarket for execution where an equivalent market exists, and says so.
+
+---
+
+## How you use it
+
+PolyRobin runs on **BankrBot, which lives on X (Twitter)** — so you place and manage
+everything by **tagging `@bankrbot` in a post or reply on X**. He reads your request,
+runs PolyRobin's analysis, and **replies to you on X** with the edge, the math, and a
+confirmation prompt before any money moves. There's no dashboard and no separate app:
+if you can post on X, you can use it.
+
+```
+@bankrbot using the polyrobin skill, put $20 on tonight's fight — size it and show the math
+@bankrbot using the polyrobin skill, bet $100 my friend Tony loses $100 today on memes
+```
+
+He replies in-thread with his independent probability, the edge and size math, the 7
+gates' status, and a `Confirm?` — nothing executes until you reply `yes` on X.
 
 ---
 
@@ -188,7 +207,9 @@ size a bet it can't cleanly exit (gate 7).
 install the polyrobin skill from https://github.com/PhantomCapAI/PolyRobin
 ```
 
-Then talk to it: `@bankrbot using the polyrobin skill, find crypto markets resolving this week`.
+Then talk to it **on X** — tag `@bankrbot` in a post or reply, e.g.
+`@bankrbot using the polyrobin skill, find crypto markets resolving this week` — and
+he replies to you on X.
 
 For local development:
 ```bash

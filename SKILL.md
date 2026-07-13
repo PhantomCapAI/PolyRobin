@@ -1,6 +1,6 @@
 ---
 name: PolyRobin
-description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain that builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, turns natural-language social & friend bets into fair verifiable wagers, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
+description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain, used by tagging @bankrbot on X (he replies to you on X) — it builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, turns natural-language social & friend bets into fair verifiable wagers, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
 tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, social-bets, friend-bets, risk-management, bankrbot]
 version: 1.1.0
 visibility: public
@@ -292,8 +292,10 @@ For any message like *"bet $100 my friend Tony loses $100 today on memes"*, Poly
 
 ## Example Commands
 
-PolyRobin is invoked in natural language through `@bankrbot`. Every example below
-is a message you send to `@bankrbot`. It always explains its reasoning and asks for
+PolyRobin is invoked in natural language by **tagging `@bankrbot` on X (Twitter)** —
+you post or reply mentioning him, and he responds to you **on X** with the analysis,
+the math, and a confirmation prompt before anything moves. Every example below is a
+message you send to `@bankrbot`. It always explains its reasoning and asks for
 confirmation before anything that moves money.
 
 ### 🔎 Discovery

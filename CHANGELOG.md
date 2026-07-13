@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **"How you use it" (README) + X interaction model made explicit** — documents that
+  BankrBot lives on **X**, so PolyRobin is used by tagging `@bankrbot` in a post or
+  reply and he responds on X. Reflected in the `SKILL.md` frontmatter description and
+  the Example Commands intro as well.
 - **README: "How funds flow through Polymarket"** — a plain-language walkthrough of
   the money path for a prediction-market bet (funded in USDC on Polygon, executed by
   BankrBot from the user's own wallet on confirmation, resolved via the UMA oracle,
