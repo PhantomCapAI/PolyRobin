@@ -7,10 +7,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
-- **Disclosed Polymarket referral link** in the README (`?r=PolyRobin`) with an
-  explicit disclosure that it's a referral and a risk note — new signups via the link
-  support development. Placed in public-facing docs only (it credits web signups, not
-  BankrBot's programmatic fills).
 - **Sample Rationale Card** — `examples/rationale-card.json` (machine-readable) and
   `examples/rationale-card.md` (human-readable) show a full worked recommendation:
   independent probability, source-tagged inputs, edge/EV math, Kelly size math, all 7
