@@ -29,6 +29,7 @@ trade requires your explicit confirmation.
 - [Configuration](#configuration)
 - [What runs where](#what-runs-where)
 - [Contributing](#contributing)
+- [Token](#token)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
@@ -41,8 +42,9 @@ trade requires your explicit confirmation.
 - ✅ **An execution *guide*** — hands BankrBot a clear, confirmed instruction and
   monitors the result.
 - ❌ **Not an autonomous trader** — never bets, bridges, or hedges without your `yes`.
-- ❌ **Not a new venue or contract** — it adds judgment on top of BankrBot's
-  existing integrations.
+- ❌ **Not a new execution venue or contract** — the skill adds judgment on top of
+  BankrBot's existing integrations (the `$PR` community token is separate from the
+  skill's logic).
 
 **Robinhood Chain (realistic scope):** the split, plainly — **funding, bridging,
 swaps, and tokenized assets are live on Robinhood Chain; prediction execution is
@@ -253,6 +255,25 @@ inside its safe band (and that gate 5 confirmation stays on).
 See [CONTRIBUTING.md](./CONTRIBUTING.md). Run `./scripts/validate.sh` before a PR
 (CI runs it too), keep `SKILL.md` / `README.md` / `examples/config.yaml`
 consistent, and report vulnerabilities privately per [SECURITY.md](./SECURITY.md).
+
+---
+
+## Token
+
+**PolyRobin ($PR)** — the project's community token on **Robinhood Chain**.
+
+| | |
+|---|---|
+| **Ticker** | PR |
+| **Chain** | Robinhood Chain |
+| **Contract (PR)** | `0x41f297b03c10ae2148cc31bc7e454a531cc58ba3` |
+| **Pair** | PR / WETH |
+| **Live price & charts** | [GeckoTerminal](https://www.geckoterminal.com/robinhood/pools/0x15e9866f3a0b29ac78dbbdcfa409e436a2194b67ae4601d80aa4a6fd9a085421) |
+| **Trade / info** | [Bankr](https://bankr.bot/terminal/discover/0x41f297b03c10ae2148cc31bc7e454a531cc58ba3) |
+
+The token is **separate from the skill's logic** — PolyRobin's analysis, safety
+gates, and execution guidance work identically whether or not you hold it. **Not
+financial advice; always verify the contract address yourself before interacting.**
 
 ---
 

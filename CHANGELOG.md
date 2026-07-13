@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Token section (README)** — documents the **PolyRobin ($PR)** community token on
+  **Robinhood Chain** (contract `0x41f2…8ba3`, PR/WETH pair) with links to live price
+  (GeckoTerminal) and Bankr. Durable fields only — no hardcoded price/mcap. Clarifies
+  the token is separate from the skill's logic. Reworded the "not a new contract"
+  bullets in `README.md` and `SKILL.md` so they no longer read as contradictory.
 - **`Sizing & EV — exact formulas` section in `SKILL.md`** — pins down the math so
   BankrBot computes it correctly and reproducibly: `EV_gross = (p − c)/c`,
   `EV_net = gross − slippage − fees` (slippage from order size vs. depth; Polymarket
