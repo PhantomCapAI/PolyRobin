@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **Sample Rationale Card** — `examples/rationale-card.json` (machine-readable) and
+  `examples/rationale-card.md` (human-readable) show a full worked recommendation:
+  independent probability, source-tagged inputs, edge/EV math, Kelly size math, all 7
+  gate results, and state — so users can see PolyRobin's output before installing.
+- **`▶️ Demo quick-start`** block in `SKILL.md` — a safe, four-message sequence that
+  ends in analysis or a `Confirm?` prompt (no funds move), for live demos.
+
+### Changed
+- **Validator now checks safety, not just syntax** — `scripts/validate.sh` verifies
+  every `risk.*` value sits inside its safe gate band and that gate 5 (confirmation)
+  is `true`, and validates the sample Rationale Card (7 gates, confirmation present).
+- **Tightened Robinhood-Chain wording** in `SKILL.md` and `README.md` to state the
+  funding-vs-execution split plainly (funding/bridging/swaps/tokenized assets live on
+  RH Chain; prediction execution still mostly Polymarket), removing the "first-class"
+  ambiguity flagged in review.
+
+### Added (prior)
 - **"How you use it" (README) + X interaction model made explicit** — documents that
   BankrBot lives on **X**, so PolyRobin is used by tagging `@bankrbot` in a post or
   reply and he responds on X. Reflected in the `SKILL.md` frontmatter description and
