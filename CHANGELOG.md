@@ -79,6 +79,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Full auditability via per-decision Rationale Cards.
 - Professional `README.md` and MIT `LICENSE`.
 
-[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/280267b...HEAD
-[1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/17c681a...280267b
-[1.0.0]: https://github.com/PhantomCapAI/PolyRobin/commit/17c681a
+[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/PhantomCapAI/PolyRobin/releases/tag/v1.0.0
