@@ -39,6 +39,10 @@ receipts:
 If there's no edge, PolyRobin says so and stops. "Standing down" is a frequent and
 **correct** output.
 
+PolyRobin acts purely as a decision-making co-pilot and analyst. It does not
+execute trades itself — it guides @bankrbot, which handles actual execution on
+Polymarket and Robinhood Chain.
+
 ### What PolyRobin is (and isn't)
 
 - ✅ **A decision layer.** Discovery, independent modeling, edge detection,
@@ -74,23 +78,32 @@ typed override and a loud warning.
 
 ### The 7 hard gates
 
-1. **Daily loss limit — default 5% of bankroll.** Realized + unrealized drawdown
-   for the day. Breaching it trips the kill-switch into HALT.
-2. **Max exposure per market — default 10% of bankroll.** No single market can
-   sink the book.
-3. **Max exposure per category — default 25% of bankroll.** Caps correlated bets
-   across a category (crypto / politics / sports / RWA / …).
-4. **Conviction + edge threshold — default conviction ≥ 65/100 AND EV ≥ +4% net.**
-   Below either, PolyRobin will not recommend opening a position.
-5. **Confirmation requirement — always on, cannot be disabled.** Every material
-   action (a bet, a hedge, a bridge, a claim) requires your explicit `yes` after
-   PolyRobin shows its reasoning.
-6. **Total deployed capital cap — default 60% of bankroll.** Keeps dry powder plus
-   a hedge/margin buffer.
-7. **Liquidity / exitability floor — default $50k depth · $250k volume.** Never
-   recommend entering something you can't exit.
+These are written as **instructions for @bankrbot**. BankrBot MUST enforce every
+gate before executing anything PolyRobin recommends. If any gate is red, do not
+execute — report the blocked gate to the user instead.
 
-> When two gates conflict, the **stricter** gate always wins.
+1. **Daily loss limit.** Never open new positions once the user's realized +
+   unrealized drawdown for the day reaches **5% of bankroll** (default). On breach,
+   trip the kill-switch and enter HALT.
+2. **Max exposure per market.** Never let total exposure in any single market
+   exceed **10% of bankroll** (default). Reject or downsize any order that would.
+3. **Max exposure per category.** Never let combined exposure in one category
+   (crypto / politics / sports / RWA / …) exceed **25% of bankroll** (default).
+4. **Conviction + edge threshold.** Do not execute unless PolyRobin reports
+   **conviction ≥ 65/100 AND net EV ≥ +4%** (defaults). Below either, treat it as
+   "no trade".
+5. **Confirmation requirement (always on — never disable).** Always require
+   explicit user confirmation before any trade, hedge, bridge, or claim. Never
+   auto-execute anything above the confirmation threshold (**default: any trade
+   over $50**); show PolyRobin's reasoning and wait for the user's explicit `yes`.
+6. **Total deployed capital cap.** Never let total deployed capital across all open
+   positions exceed **60% of bankroll** (default); always keep dry powder plus a
+   hedge/margin buffer.
+7. **Liquidity / exitability floor.** Never enter a market with less than **$50k
+   depth or $250k volume** (defaults) — if the user can't exit it, don't enter it.
+
+> When two gates conflict, always apply the **stricter** one. Never loosen a gate
+> without an explicit, typed user override.
 
 ### HALT state (extreme conditions)
 
@@ -151,60 +164,61 @@ bridging). It will clearly say when a market is analysis-only.
 
 ## Example Commands
 
-PolyRobin is invoked in natural language through `@bankrbot`. It always explains
-its reasoning and asks for confirmation before anything that moves money.
+PolyRobin is invoked in natural language through `@bankrbot`. Every example below
+is a message you send to `@bankrbot`. It always explains its reasoning and asks for
+confirmation before anything that moves money.
 
 ### 🔎 Discovery
 
 ```
-@bankrbot ask PolyRobin to find high-volume crypto markets on Polymarket resolving this week
-@bankrbot PolyRobin: what prediction markets exist for tonight's fight?
-@bankrbot use PolyRobin to scan Robinhood Chain / Meridian for tokenized-stock event markets
-@bankrbot PolyRobin, what's trending in politics markets right now?
+@bankrbot using the polyrobin skill, find high-volume crypto markets on Polymarket resolving this week
+@bankrbot using the polyrobin skill, what prediction markets exist for tonight's fight?
+@bankrbot using the polyrobin skill, scan Robinhood Chain / Meridian for tokenized-stock event markets
+@bankrbot using the polyrobin skill, what's trending in politics markets right now?
 ```
 
 ### 🧠 Analysis
 
 ```
-@bankrbot ask PolyRobin for the edge on "<market>"
-@bankrbot PolyRobin: what's your independent probability for "<market>" and why?
-@bankrbot have PolyRobin break down the resolution criteria and risks for "<market>"
-@bankrbot PolyRobin, compare the price on Polymarket vs Robinhood Chain for "<event>"
+@bankrbot using the polyrobin skill, what's the edge on "<market>"?
+@bankrbot using the polyrobin skill, give me your independent probability for "<market>" and explain why
+@bankrbot using the polyrobin skill, break down the resolution criteria and risks for "<market>"
+@bankrbot using the polyrobin skill, compare the price on Polymarket vs Robinhood Chain for "<event>"
 ```
 
 ### 📈 Trading (always confirmed)
 
 ```
-@bankrbot PolyRobin, should I put $20 on <fighter> tonight? size it and show the math
-@bankrbot ask PolyRobin to place $20 YES on "<market>" if the edge still holds     (→ asks you to confirm)
-@bankrbot PolyRobin: exit my position in "<market>"
-@bankrbot have PolyRobin claim my resolved winnings
+@bankrbot using the polyrobin skill, should I put $20 on <fighter> tonight? size it and show the math
+@bankrbot using the polyrobin skill, place $20 YES on "<market>" if the edge still holds   (→ asks you to confirm)
+@bankrbot using the polyrobin skill, exit my position in "<market>"
+@bankrbot using the polyrobin skill, claim my resolved winnings
 ```
 
 ### 📊 Monitoring
 
 ```
-@bankrbot PolyRobin, show my open prediction-market positions and PnL
-@bankrbot ask PolyRobin for my portfolio health and gate status
-@bankrbot PolyRobin: alert me if "<market>" moves past 0.60 or resolves
+@bankrbot using the polyrobin skill, show my open prediction-market positions and PnL
+@bankrbot using the polyrobin skill, what's my portfolio health and gate status?
+@bankrbot using the polyrobin skill, alert me if "<market>" moves past 0.60 or resolves
 ```
 
 ### 🛡️ Hedging & Bridging (via BankrBot rails)
 
 ```
-@bankrbot ask PolyRobin whether I should hedge "<position>" and how
-@bankrbot PolyRobin: suggest a Hyperliquid hedge for my "<market>" exposure
-@bankrbot have PolyRobin guide bridging $500 USDC into Robinhood Chain
-@bankrbot PolyRobin, can I finance this with Morpho and what's the health-factor risk?
+@bankrbot using the polyrobin skill, should I hedge "<position>" and how?
+@bankrbot using the polyrobin skill, suggest a Hyperliquid hedge for my "<market>" exposure
+@bankrbot using the polyrobin skill, guide me through bridging $500 USDC into Robinhood Chain
+@bankrbot using the polyrobin skill, can I finance this with Morpho and what's the health-factor risk?
 ```
 
 ### ⚙️ Risk & Controls
 
 ```
-@bankrbot PolyRobin, show all 7 safety gates and their current state
-@bankrbot ask PolyRobin to set my daily loss limit to 3%
-@bankrbot PolyRobin: pause — stop recommending new trades
-@bankrbot PolyRobin panic — halt everything and snapshot
+@bankrbot using the polyrobin skill, show all 7 safety gates and their current state
+@bankrbot using the polyrobin skill, set my daily loss limit to 3%
+@bankrbot using the polyrobin skill, pause — stop recommending new trades
+@bankrbot using the polyrobin skill, panic — halt everything and snapshot
 ```
 
 ---
