@@ -6,6 +6,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Reworked the skill around a dual-venue model with **Robinhood Chain as a
+  first-class home venue** (Meridian Predict + tokenized event markets)
+  alongside Polymarket.
+- Frontmatter: single-sentence description, focused tag set, added
+  `visibility: public`.
+- Safety model restated as **7 hard gates** (adding an always-on confirmation
+  gate and a conviction+EV gate), with HALT-on-volatility, a kill-switch, and a
+  separate emergency `pause`.
+- Bridging now always routes funds **into Robinhood Chain** with optimal routing
+  (no fixed source chain).
+- New section structure: Overview, Safety Model, Supported Markets, Example
+  Commands (Discovery / Analysis / Trading / Monitoring / Hedging & Bridging),
+  Integration Hooks, Edge Cases & Risk Handling, Auditability & Transparency.
+- Added Chainlink oracle integration and auto-claiming on resolution.
+- Updated sample config and validator to match the new structure.
+
 ### Added
 - Repository scaffolding: sample config, CI validation, security policy,
   contribution guide, issue/PR templates.

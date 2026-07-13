@@ -64,8 +64,9 @@ print(f"✅ SKILL.md frontmatter OK (name={fm['name']}, version={fm['version']},
 
 # --- Required sections ------------------------------------------------------
 body = text[m.end():]
-for heading in ["Overview", "Safety Model", "Supported Strategies",
-                "Example Commands", "Integration Hooks", "Edge Cases"]:
+for heading in ["Overview", "Safety Model", "Supported Markets",
+                "Example Commands", "Integration Hooks", "Edge Cases",
+                "Auditability"]:
     if not re.search(rf"^#+\s+.*{re.escape(heading)}", body, re.MULTILINE):
         print(f"❌ SKILL.md missing required section: {heading}", file=sys.stderr)
         sys.exit(1)
@@ -78,7 +79,7 @@ except yaml.YAMLError as e:
     print(f"❌ examples/config.yaml is not valid YAML: {e}", file=sys.stderr)
     sys.exit(1)
 
-for key in ["risk", "strategies", "integrations"]:
+for key in ["risk", "integrations", "bridge"]:
     if key not in cfg:
         print(f"❌ examples/config.yaml missing top-level key: {key}", file=sys.stderr)
         sys.exit(1)

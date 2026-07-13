@@ -1,16 +1,17 @@
 # 🏹 PolyRobin
 
-**An autonomous, safety-first prediction-market agent for Polymarket.**
+**A safety-first, autonomous prediction-market agent for Polymarket and Robinhood Chain.**
 
-PolyRobin discovers high-conviction markets, builds its *own* probability
-estimates from live news, onchain, and sentiment signals, and only trades when it
-finds a real, fee-adjusted edge. It sizes with fractional Kelly, enforces hard
-risk limits, manages positions to resolution, and hedges across **Hyperliquid**
-and **Morpho** — with native **Robinhood Chain** bridging for funding and
-tokenized-asset (RWA) markets.
+PolyRobin discovers, analyzes, and trades prediction markets across **Polymarket
+(Polygon)** and **Robinhood Chain** — including **Meridian Predict** and tokenized
+event markets — all in natural language. It builds its *own* probability estimates
+from news sentiment, onchain signals, historical resolution data, and a careful
+read of the resolution criteria, only trades when there's a real edge, sizes with
+fractional Kelly, and wraps everything in **7 hard safety gates**, a **HALT**
+state, and a **kill-switch**. Robinhood Chain is a first-class home venue.
 
 > Built as a [BankrBot](https://bankr.bot) skill. It's an analyst that can pull
-> the trigger — not a black box that trades while you sleep.
+> the trigger — and always shows its work before it does.
 
 [![Skill](https://img.shields.io/badge/BankrBot-Skill-6C5CE7)](./SKILL.md)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)](./SKILL.md)
@@ -24,15 +25,14 @@ tokenized-asset (RWA) markets.
 - [Why PolyRobin](#why-polyrobin)
 - [Features](#features)
 - [How It Works](#how-it-works)
-- [Safety Cheat Sheet](#-safety-cheat-sheet)
+- [🛡️ Safety Cheat Sheet](#-safety-cheat-sheet)
+- [Supported Markets](#supported-markets)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Quick Start](#quick-start)
-- [Example Flows](#example-flows)
+- [Example User Flows](#example-user-flows)
 - [Command Reference](#command-reference)
-- [Supported Strategies](#supported-strategies)
 - [Integrations](#integrations)
-- [Autonomy Levels](#autonomy-levels)
 - [Auditability](#auditability)
 - [FAQ](#faq)
 - [Contributing](#contributing)
@@ -43,35 +43,32 @@ tokenized-asset (RWA) markets.
 
 ## Why PolyRobin
 
-Most trading bots arbitrage the order book or follow momentum. PolyRobin does
-something harder and more honest: it forms an **independent view of the truth**
-first, then compares that view to the market price. If the market already agrees
-with it, PolyRobin does nothing — and tells you why.
-
-Three questions, answered with receipts, for every market:
+Most bots arbitrage the order book or follow momentum. PolyRobin forms an
+**independent view of the truth** first, then compares it to the market price. If
+the market already agrees, it does nothing — and tells you why. Three questions,
+answered with receipts, for every market:
 
 1. **What's the true probability?** — an independent estimate from evidence.
-2. **Is there an edge?** — the gap between estimate and price, in EV after costs.
+2. **Is there an edge?** — estimate vs. price, in EV after fees, slippage, bridge.
 3. **How much should we risk?** — Kelly-sized, volatility-adjusted, capped.
 
 ---
 
 ## Features
 
-- 🔎 **Market discovery & filtering** by volume, liquidity, category, and time to
-  resolution (crypto, politics, sports, weather, RWA, and more).
-- 🧠 **Independent probability modeling** from news, onchain signals, sentiment,
-  and rigorous resolution-criteria analysis.
-- 🎯 **Edge detection** with EV thresholds and a 0–100 conviction score.
-- 📐 **Smart sizing** via fractional Kelly, volatility adjustment, and
-  portfolio-wide exposure caps.
-- 🛡️ **Cross-protocol hedging** with Hyperliquid perps and Morpho borrow/lend.
-- 🌉 **Robinhood Chain support** — bridge USDC, cross-chain balance views, and
-  tokenized-asset market targeting.
-- 📊 **Portfolio monitoring** — open positions, PnL, health, resolution alerts.
-- 🚨 **Safety-first framework** — seven hard gates, kill-switch, and a HALT state.
+- 🌐 **Unified discovery** across Polymarket (Polygon) and **Robinhood Chain**
+  (Meridian Predict + tokenized event markets).
+- 🧠 **Independent probability modeling** from news sentiment, onchain signals,
+  historical resolution data, and resolution-criteria analysis.
+- 🎯 **Transparent edge detection** with a 0–100 conviction score and full math.
+- 📐 **Smart sizing** via fractional Kelly, volatility adjustment, exposure caps.
+- 🔁 **Full position management** — entry, exit, hedging, resolution monitoring,
+  and auto-claiming.
+- 🛡️ **Cross-protocol hedging** with Hyperliquid perps and Morpho lending.
+- 🌉 **Bridging into Robinhood Chain** with optimal routing.
+- 📊 **Real-time monitoring** — positions, PnL, health, customizable alerts.
+- 🚨 **7 hard safety gates** + HALT-on-volatility + kill-switch + emergency pause.
 - 🔬 **Full auditability** — a Rationale Card for every decision.
-- 💬 **Natural-language interface** that always explains its reasoning.
 
 ---
 
@@ -80,49 +77,65 @@ Three questions, answered with receipts, for every market:
 ```
 DISCOVER → MODEL P → PRICE EDGE → SIZE → CONFIRM → EXECUTE → MANAGE → RESOLVE → REPORT
    │          │          │         │        │          │         │         │        │
- filter    news+      EV net    frac-    human      place     monitor   settle+  PnL +
- vol/liq   onchain+   of fees/  Kelly    gate       order     + hedge   claim    audit
- /category sentiment  slippage  +vol-adj (>thresh)                                card
+ Polymarket news+      EV net    frac-    human      route +   monitor   settle+  PnL +
+ + RH Chain onchain+   fees/slip/ Kelly    yes (gate  place     + hedge   auto-    Rationale
+ /Meridian  sentiment  bridge     +vol-adj  5)                            claim    Card
 ```
 
-Every stage can veto. If the resolution criteria are ambiguous, if liquidity is
-too thin to exit, if data is stale or sources disagree — PolyRobin abstains.
-**Silence is a valid and frequent output.**
+Every stage can veto. Ambiguous resolution criteria, thin liquidity, stale/
+conflicting oracles, or extreme volatility all cause PolyRobin to abstain or HALT.
+**Standing down is a valid and frequent output.**
 
 ---
 
 ## 🛡️ Safety Cheat Sheet
 
-Keep this handy. All values are configurable but ship at safe defaults.
+All values are configurable but ship conservative. **Gate 5 (confirmation) cannot
+be disabled.**
 
-| Gate | Default | Command to view/change |
-|------|---------|------------------------|
-| Daily loss limit | **5%** of bankroll | `polyrobin set daily-loss-limit 3%` |
-| Max per market | **10%** | `polyrobin set max-per-market 8%` |
-| Max per category | **25%** | `polyrobin set max-per-category 20%` |
-| Total deployed cap | **60%** | `polyrobin set total-cap 50%` |
-| Min edge (EV) | **+4% net** | `polyrobin set min-edge 5%` |
-| Min liquidity / volume | **$50k / $250k** | `polyrobin set min-liquidity 75k` |
-| Confirm over | **$250 / trade** | `polyrobin set confirm-over 100` |
+| # | Gate | Default | Change with |
+|---|------|---------|-------------|
+| 1 | Daily loss limit | **5%** of bankroll | `polyrobin set daily-loss-limit 3%` |
+| 2 | Max per market | **10%** | `polyrobin set max-per-market 8%` |
+| 3 | Max per category | **25%** | `polyrobin set max-per-category 20%` |
+| 4 | Conviction threshold | **≥65/100 & EV ≥ +4%** | `polyrobin set conviction-threshold 70` |
+| 5 | Confirmation required | **every material action** | 🔒 always on |
+| 6 | Total deployed cap | **60%** | `polyrobin set total-cap 50%` |
+| 7 | Liquidity / exitability | **$50k depth · $250k vol** | `polyrobin set min-liquidity 75k` |
 
-**Kill-switch trips on:** daily loss limit hit · 3 consecutive losses in 24h ·
-stale/conflicting data feeds · wallet/allowance anomaly · manual `panic`.
+**HALT triggers:** extreme volatility · oracle staleness/disagreement (Chainlink)
+· data-source conflict · bridge congestion/failure · 3 losses in 24h.
 
-**Emergency commands:**
+**Emergency controls:**
 
 ```
+polyrobin pause     # soft freeze — suspend new activity, keep monitoring/claiming
 polyrobin halt      # stop opening new positions
-polyrobin panic     # HALT + alert + snapshot everything
-polyrobin resume    # requires explicit human action to exit HALT
-polyrobin gates     # see all seven gates and their live state
-polyrobin health    # exposure heatmap + integration health
+polyrobin panic     # kill-switch: HALT + snapshot + cancel working orders + alert
+polyrobin resume    # explicit human action required to exit HALT/pause
+polyrobin gates     # live state of all 7 gates
 ```
 
-**Golden rules baked into the agent:**
-- The *stricter* gate always wins when two conflict.
-- No mode ever disables the hard gates or the kill-switch.
-- Keys never touch PolyRobin — signing is via your own signer.
-- Ambiguous-resolution markets are never traded, at any edge.
+**Golden rules:** stricter gate always wins · no gate bypassed silently · keys
+never touch PolyRobin · ambiguous-resolution markets are never traded, at any edge.
+
+---
+
+## Supported Markets
+
+| Category | Examples | Venue(s) |
+|----------|----------|----------|
+| Politics & elections | Rate decisions, elections, policy votes | Polymarket · RH Chain |
+| Crypto | "ETH > $5k EOY", ETF flows, protocol events | Polymarket · RH Chain |
+| Sports | Match/series outcomes, season props | Polymarket |
+| Macro & economics | CPI, Fed moves, jobs data | Polymarket · Meridian |
+| RWAs & tokenized assets | Tokenized T-bill / commodity milestones | Robinhood Chain |
+| **Tokenized stock events** | Earnings beats, listings, corporate actions | **RH Chain (Meridian Predict)** |
+| Weather & misc events | Climate thresholds, scheduled catalysts | Polymarket |
+
+Robinhood Chain is a **first-class home venue** — Meridian Predict and tokenized
+event markets are surfaced natively, with EV math that already accounts for bridge
+latency and cost.
 
 ---
 
@@ -131,189 +144,113 @@ polyrobin health    # exposure heatmap + integration health
 > Requires a BankrBot-compatible environment and a funded wallet/signer.
 
 ```bash
-# 1. Clone the skill
-git clone https://github.com/<you>/polyrobin.git
-cd polyrobin
+# Clone
+git clone https://github.com/PhantomCapAI/PolyRobin.git
+cd PolyRobin
 
-# 2. Install into your BankrBot skills directory
+# Install the skill into BankrBot
 bankr skill install ./SKILL.md
-#    or symlink for development:
+#   or symlink for development:
 ln -s "$(pwd)/SKILL.md" ~/.bankr/skills/polyrobin.md
 
-# 3. Initialize config (writes ~/.polyrobin/config.yaml with safe defaults)
+# Initialize config with safe defaults
 polyrobin init
 
-# 4. Connect your signer (keys stay with you — never in config)
+# Connect your signer (keys stay with you)
 polyrobin signer connect ledger        # or: walletconnect | keystore
 
-# 5. Verify integrations
+# Verify integrations + gates
 polyrobin health
 ```
+
+See [Exact BankrBot install command](#installation) below for the one-liner.
 
 ---
 
 ## Configuration
 
-PolyRobin reads `~/.polyrobin/config.yaml`. A minimal, safe starting point:
-
-```yaml
-bankroll_source: robinhood-chain
-signer: ledger               # never a raw private key here
-autonomy: assisted           # assisted | supervised | autonomous
-
-risk:
-  daily_loss_limit: 0.05
-  max_per_market: 0.10
-  max_per_category: 0.25
-  total_deployed_cap: 0.60
-  min_edge: 0.04
-  min_liquidity_usd: 50000
-  min_volume_usd: 250000
-  confirm_over_usd: 250
-  kelly_fraction: 0.25
-
-strategies:
-  conviction_value: on
-  late_snipe: off
-  arbitrage: off
-  event_hedge: off
-  category_basket: off
-  criteria_arb: off
-  rwa_plays: off
-
-integrations:
-  polymarket:      { enabled: true }
-  robinhood_chain: { enabled: true }
-  hyperliquid:     { enabled: false }
-  morpho:          { enabled: false }
-  notifier:        { enabled: true, channel: cli }
-```
-
-Loosening any gate beyond its recommended band requires a typed override phrase —
-PolyRobin will warn you first.
+Copy [`examples/config.yaml`](./examples/config.yaml) to `~/.polyrobin/config.yaml`
+and adjust. Never put private keys in config — PolyRobin signs through a
+user-controlled signer only. Loosening a gate beyond its safe band requires a
+typed override.
 
 ---
 
 ## Quick Start
 
 ```bash
-# See what's interesting right now
-polyrobin scan --category crypto --min-volume 250k
-
-# Get PolyRobin's independent read on a specific market
-polyrobin analyze <market-id>
-polyrobin why <market-id>          # sources + full rationale card
-
-# Ask for a size (no execution)
-polyrobin size <market-id>
-
-# Place it — only fills if the edge still clears the threshold
-polyrobin buy YES <market-id> --edge-gated --confirm
-
-# Watch your book
-polyrobin portfolio
-polyrobin pnl --today
+polyrobin scan --venue robinhood-chain --tokenized-stocks   # discover
+polyrobin why <market-id>                                   # full reasoning
+polyrobin size <market-id>                                  # recommended stake
+polyrobin buy YES <market-id> --edge-gated --confirm        # trade (asks yes)
+polyrobin portfolio                                         # monitor
 ```
 
 ---
 
-## Example Flows
+## Example User Flows
 
-### Flow 1 — Find an edge and enter (assisted mode)
-
-```
-> polyrobin scan --category crypto --resolving-within 30d
-  Found 6 markets clearing volume/liquidity gates. Top by conviction:
-  1. "ETH close > $5,000 on Dec 31"   price 0.38 | est 0.47 | edge +9pts
-
-> polyrobin why "ETH close > $5,000 on Dec 31"
-  My estimate: 0.47 (conviction 72/100)
-  • Onchain: spot-ETF net inflows accelerating (strong, fresh)
-  • News: constructive macro reporting (moderate)
-  • Sentiment: mildly bullish (weak prior)
-  • Resolution: Chainlink close — unambiguous ✅
-  EV ≈ +6.2% net of ~0.4% fees, ~0.3% est. slippage.
-
-> polyrobin size "ETH close > $5,000 on Dec 31"
-  Suggested $180 (¼-Kelly, vol-adjusted) = 3.6% of bankroll.
-  Crypto category exposure 18% → 21.6% (cap 25%). All gates ✅.
-
-> polyrobin buy YES "ETH close > $5,000 on Dec 31" --size 180 --edge-gated
-  ✅ Filled 474 shares @ 0.38. tx: 0xabc… Rationale Card saved: RC-1042.
-```
-
-### Flow 2 — Hedge a conviction position across protocols
+### Flow 1 — Discover and trade a tokenized-stock event on Robinhood Chain
 
 ```
-> polyrobin hedge-suggest POS-1042
-  Position: YES ETH>$5k, $180 notional, directional-long.
-  Suggested hedge: Hyperliquid ETH-PERP short, 0.05 ETH (~$170 delta).
-  Est. hedge cost (funding, 30d): ~$3.10. Shapes payoff to +EV, lower variance.
+> polyrobin scan --venue robinhood-chain --tokenized-stocks --resolving-within 14d
+  4 Meridian Predict markets clear volume/liquidity gates. Top by conviction:
+  1. "NVDA beats Q3 EPS estimate"   price 0.55 | est 0.63 | conviction 71
 
-> polyrobin hedge POS-1042 --venue hyperliquid --instrument ETH-PERP --confirm
-  ✅ Hedge leg placed. Combined position variance ↓ 41%. Both legs linked.
+> polyrobin why "NVDA beats Q3 EPS estimate"
+  My estimate 0.63 (conviction 71/100)
+  • Historical resolution: 8 of last 10 quarters beat (strong prior)
+  • News sentiment: supply-chain commentary constructive (moderate)
+  • Onchain/flow: tokenized NVDA net accumulation (weak-moderate)
+  • Resolution: Chainlink-verified earnings feed — unambiguous ✅
+  EV ≈ +5.4% net of fees/slippage.
+
+> polyrobin buy YES "NVDA beats Q3 EPS estimate" --size 150 --edge-gated
+  Suggested $150 (¼-Kelly) = 3% of bankroll. All 7 gates ✅.
+  Confirm? reply `yes`
+> yes
+  ✅ Filled on Robinhood Chain. Rationale Card RC-2087 saved.
 ```
 
-### Flow 3 — Fund from Robinhood Chain and target an RWA market
+### Flow 2 — Bridge into Robinhood Chain, then hedge across protocols
 
 ```
-> polyrobin bridge 500 USDC from robinhood-chain to polygon
-  Bridging 500 USDC. Est. time 3–6 min, cost ~$0.40. bridge-id: BR-77.
+> polyrobin bridge 500 USDC to robinhood-chain
+  Optimal route selected. Est. 3–6 min, cost ~$0.40. bridge-id BR-77.
 
-> polyrobin markets --tokenized-assets
-  3 RWA/RH-linked markets clear gates.
-
-> polyrobin dry-run buy YES <rwa-market-id>
-  Full pipeline, zero execution: edge +5.1%, size $120, all gates ✅.
-  (Funds mid-bridge treated as unavailable until BR-77 settles.)
+> polyrobin hedge-suggest POS-2087
+  Suggested: Hyperliquid short to neutralize event-day delta. Cost ~$2.90/30d.
+  Confirm? reply `yes`
 ```
 
-### Flow 4 — A day the kill-switch does its job
+### Flow 3 — The kill-switch does its job
 
 ```
 > polyrobin pnl --today
-  Realized -3.1%, unrealized -2.2%. Combined -5.3% ≥ 5% daily limit.
-  🚨 Kill-switch tripped. State: HALT. No new positions will open.
-  Open positions held; resolution monitoring continues.
+  Realized -3.1%, unrealized -2.2% → -5.3% ≥ 5% limit.
+  🚨 Kill-switch: state HALT. Working orders cancelled, book snapshotted (RC-2101).
+  Positions held; resolution + auto-claim monitoring continues.
 
 > polyrobin resume
-  ⚠️ You are exiting HALT after a limit breach. Type: RESUME TRADING
+  ⚠️ Exiting HALT after a limit breach. Type: RESUME TRADING
 > RESUME TRADING
-  ✅ Resumed. Consider lowering size for the rest of the session.
+  ✅ Resumed. Consider smaller size for the rest of the session.
 ```
 
 ---
 
 ## Command Reference
 
-Grouped canonical commands (see [SKILL.md](./SKILL.md) for the full set):
+| Group | Examples |
+|-------|----------|
+| **Discovery** | `scan`, `scan --venue robinhood-chain`, `trending`, `watch`, `markets` |
+| **Analysis** | `analyze`, `edge`, `why`, `criteria`, `compare` |
+| **Trading** | `size`, `buy`, `limit`, `exit`, `claim`, `dry-run` |
+| **Monitoring** | `portfolio`, `positions`, `pnl`, `health`, `alerts` |
+| **Hedging & Bridging** | `bridge`, `xchain view`, `hedge`, `hedge-suggest`, `unhedge` |
+| **Risk & Controls** | `gates`, `set`, `pause`, `halt`, `resume`, `panic` |
 
-| Category | Examples |
-|----------|----------|
-| **Funding / RH Chain** | `bridge`, `fund`, `xchain view`, `balance` |
-| **Discovery** | `scan`, `watch`, `trending`, `markets --tokenized-assets` |
-| **Analysis** | `analyze`, `edge`, `why`, `compare`, `model` |
-| **Entry / Sizing** | `size`, `buy`, `snipe`, `limit`, `dry-run` |
-| **Hedging** | `hedge`, `hedge-suggest`, `unhedge` |
-| **Portfolio** | `portfolio`, `positions`, `pnl`, `health`, `alerts` |
-| **Exit** | `exit`, `exit-all`, `claim`, `trailing-stop` |
-| **Risk / Config** | `config`, `set`, `gates`, `halt`, `resume`, `panic` |
-| **Audit** | `explain`, `audit`, `log` |
-
----
-
-## Supported Strategies
-
-1. **Conviction Value** *(on by default)* — trade genuine mispricings, ¼-Kelly.
-2. **Late-Window Snipe** — exploit end-of-life stale liquidity.
-3. **Cross-Venue Arbitrage** — same event, different implied prob across venues.
-4. **Event Hedge** — neutralize direction with Hyperliquid/Morpho.
-5. **Category Basket** — diversify a thesis within a category cap.
-6. **Resolution-Criteria Arbitrage** — profit from unambiguous fine-print gaps.
-7. **Robinhood-Chain RWA Plays** — tokenized-asset & RH-ecosystem markets.
-
-All strategies are off by default except Conviction Value. Enable with
-`polyrobin strategy enable <name>`.
+Full command set lives in [`SKILL.md`](./SKILL.md).
 
 ---
 
@@ -321,82 +258,66 @@ All strategies are off by default except Conviction Value. Enable with
 
 | Integration | Purpose |
 |-------------|---------|
-| **Polymarket** | Primary market data, execution, resolution |
-| **Robinhood Chain** | USDC bridging, cross-chain views, RH/RWA markets |
+| **Polymarket** | Market data, execution, resolution (Polygon) |
+| **Robinhood Chain / Meridian Predict** | RH-native prediction & tokenized event markets |
+| **Chainlink oracles** | Price + resolution feeds, staleness/disagreement checks |
 | **Hyperliquid** | Perp hedging + implied-probability cross-checks |
 | **Morpho** | Borrow/lend to finance or hedge (health-factor aware) |
-| **News / onchain / sentiment providers** | Probability model inputs |
+| **Bridging protocol** | USDC routing into Robinhood Chain |
+| **News / onchain / sentiment** | Probability model inputs |
 | **Signer / wallet** | User-controlled signing (keys never leave you) |
-| **Notifier** | Resolution + kill-switch alerts (CLI/webhook/push) |
 
-Each adapter exposes `quote() / execute() / status() / health()`. A degraded
-adapter downgrades to read-only rather than failing open.
-
----
-
-## Autonomy Levels
-
-| Level | Behavior |
-|-------|----------|
-| **Assisted** (default) | Recommends; every trade needs your confirmation |
-| **Supervised** | Auto-executes below the confirm threshold, within all gates |
-| **Autonomous** | Executes within *all* gates without per-trade confirmation, still HALTs on any kill-switch, reports everything. Opt-in + lower per-trade cap required. |
-
-No autonomy level can disable the hard gates or the kill-switch.
+Each adapter exposes `quote() / execute() / status() / health()` and downgrades to
+read-only rather than failing open.
 
 ---
 
 ## Auditability
 
-- Every decision writes a **Rationale Card** (JSON + human-readable) to
-  `~/.polyrobin/audit/`: inputs, sources, timestamps, model version, edge, size
-  math, and each gate's result.
-- Every trade logs tx hash, chain, fill price, fees, and realized vs. quoted
-  slippage.
-- Reconstruct any decision: `polyrobin explain <trade-id>`.
-- Export the trail: `polyrobin audit --export csv --since 30d`.
-- PolyRobin never fabricates data. Missing source → widened uncertainty or
-  abstention, never a guess.
+Every decision writes a **Rationale Card** (JSON + human-readable) to
+`~/.polyrobin/audit/`: independent estimate, conviction score, weighted +
+timestamped sources, full edge and size math, and each of the 7 gates' results —
+plus, on execution, tx hash, chain, fill price, fees, and realized slippage.
+
+```
+polyrobin explain <trade-id>            # reconstruct any decision
+polyrobin audit --export csv --since 30d
+```
+
+PolyRobin never fabricates data. Missing source → widened uncertainty or
+abstention, never a guess.
 
 ---
 
 ## FAQ
 
-**Does it trade on its own?** Only if you explicitly enable Supervised or
-Autonomous mode — and even then, never outside your gates, and always with a
-kill-switch.
+**Does it trade on its own?** Only within your gates, and **every material action
+still requires your explicit confirmation** (gate 5 can't be disabled).
 
-**Will it always find a trade?** No. Frequently the correct output is "no edge,
-standing down." That's a feature.
+**Is Robinhood Chain really first-class?** Yes — Meridian Predict and tokenized
+event markets are native, not bolted on. Bridging routes funds *into* RH Chain.
 
-**Does it hold my keys?** Never. Signing happens through your configured signer.
+**Will it always find a trade?** No. "No edge, standing down" is common and correct.
 
-**What if a data source disagrees or goes stale?** Conviction collapses and
-PolyRobin abstains rather than average noise or act on old data.
+**Does it hold my keys?** Never. Signing is via your configured signer.
 
-**Can it lose money?** Yes. Prediction markets are speculative; see the
-disclaimer.
+**Can it lose money?** Yes — prediction markets are speculative. See the disclaimer.
 
 ---
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). In short:
-
-- Copy [`examples/config.yaml`](./examples/config.yaml) to `~/.polyrobin/config.yaml` to get started.
-- Run `./scripts/validate.sh` before opening a PR (CI runs it too).
-- Safety-relevant changes must document their risk impact.
-- Report vulnerabilities privately per [SECURITY.md](./SECURITY.md).
-
-Repo map:
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Run `./scripts/validate.sh` before a PR
+(CI runs it too), keep `SKILL.md` / `README.md` / `examples/config.yaml`
+consistent, document any safety impact, and report vulnerabilities privately per
+[SECURITY.md](./SECURITY.md).
 
 | Path | What it is |
 |------|------------|
 | [`SKILL.md`](./SKILL.md) | The BankrBot skill definition (source of truth) |
 | [`examples/config.yaml`](./examples/config.yaml) | Annotated sample configuration |
-| [`scripts/validate.sh`](./scripts/validate.sh) | Validates frontmatter, sections, and config |
+| [`scripts/validate.sh`](./scripts/validate.sh) | Validates frontmatter, sections, config |
 | [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) | CI: validation + link check |
-| [`SECURITY.md`](./SECURITY.md) · [`CONTRIBUTING.md`](./CONTRIBUTING.md) · [`CHANGELOG.md`](./CHANGELOG.md) | Project docs |
 
 ---
 
@@ -405,9 +326,9 @@ Repo map:
 PolyRobin is a tool for informed, risk-managed participation in prediction
 markets. **It is not financial advice.** Prediction markets are speculative and
 can lose 100% of staked capital. Availability and legality vary by jurisdiction —
-you are solely responsible for compliance with applicable laws and platform
-terms. PolyRobin optimizes for disciplined, transparent, auditable decisions; it
-cannot guarantee profit and will regularly and correctly recommend doing nothing.
+you are solely responsible for compliance with applicable laws and platform terms.
+PolyRobin optimizes for disciplined, transparent, auditable decisions; it cannot
+guarantee profit and will regularly and correctly recommend doing nothing.
 
 ---
 
