@@ -6,7 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **README: "How funds flow through Polymarket"** — a plain-language walkthrough of
+  the money path for a prediction-market bet (funded in USDC on Polygon, executed by
+  BankrBot from the user's own wallet on confirmation, resolved via the UMA oracle,
+  redeemed 1-for-$1), using a "How many times will Elon tweet this week?" bucketed
+  market as the worked example. Reinforces that PolyRobin never custodies funds.
 
 ## [1.1.0] — 2026-07-13
 
