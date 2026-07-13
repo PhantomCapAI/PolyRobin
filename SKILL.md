@@ -496,6 +496,12 @@ BankrBot MUST use these formulas so the shown math is correct and reproducible. 
 - **Recommended size:** `f* × kelly_fraction × volatility_adjustment × bankroll`, then
   **capped by every exposure gate** (per-market, per-category, deployed cap). Round
   **down**, never up.
+- **User-requested size above the recommendation:** if the user names a size larger
+  than the volatility-adjusted ¼-Kelly figure, **honor it only if it still clears
+  every gate, and flag it explicitly** — e.g. *"note: $20 exceeds ¼-Kelly ($14.50);
+  proceed only if intentional."* Never silently let a requested size exceed the
+  disciplined recommendation without saying so. A size that breaches any gate is
+  refused or downsized, not flagged-and-allowed.
 
 **Worked check** (`p=0.78`, `c=0.725`, ¼-Kelly, ~$290 bankroll):
 `EV_gross = 0.055 / 0.725 = 7.6%`; `$20 order ≪ $320k depth → slippage ≈ 0 →
