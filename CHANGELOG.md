@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   BankrBot reported a wildly overstated "full Kelly" (~0.56 vs. the correct ~0.20).
 
 ### Changed
+- **Flag requested sizes above ¼-Kelly** — `SKILL.md` now instructs that if a user
+  names a size larger than the volatility-adjusted ¼-Kelly recommendation, it's
+  honored only if it still clears every gate and is **explicitly flagged** (e.g.
+  "note: $20 exceeds ¼-Kelly ($14.50)"), never silently allowed.
 - **Corrected the sample Rationale Card math** (`examples/rationale-card.{json,md}`):
   gross→net EV now reconciles (slippage shown, ≈0 when order ≪ depth), Kelly uses the
   explicit formula, and gate 5 (confirmation) reads PENDING until `yes`.
