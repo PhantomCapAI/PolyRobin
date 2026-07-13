@@ -44,8 +44,9 @@ trade requires your explicit confirmation.
 - ❌ **Not a new venue or contract** — it adds judgment on top of BankrBot's
   existing integrations.
 
-**Robinhood Chain (realistic scope):** tokenized stocks / swaps / bridging run on
-BankrBot's live RH-Chain rails. Robinhood Chain / **Meridian Predict** prediction
+**Robinhood Chain (realistic scope):** the split, plainly — **funding, bridging,
+swaps, and tokenized assets are live on Robinhood Chain; prediction execution is
+still mostly Polymarket today.** Robinhood Chain / **Meridian Predict** prediction
 markets are **discovery + analysis only for now** (new venue) — PolyRobin falls
 back to Polymarket for execution where an equivalent market exists, and says so.
 
@@ -226,6 +227,13 @@ cp examples/config.yaml ~/.polyrobin/config.yaml   # tune your gates
 Copy [`examples/config.yaml`](./examples/config.yaml) to `~/.polyrobin/config.yaml`.
 It holds **decision parameters only** — gates, Kelly fraction, venue scope.
 Execution runs through BankrBot; **no private keys ever go in config.**
+`./scripts/validate.sh` checks the config parses *and* that every gate value sits
+inside its safe band (and that gate 5 confirmation stays on).
+
+**Want to see what PolyRobin actually outputs?** Every recommendation is logged as a
+**Rationale Card**. See a full worked sample:
+[`examples/rationale-card.md`](./examples/rationale-card.md) (readable) ·
+[`examples/rationale-card.json`](./examples/rationale-card.json) (machine-readable).
 
 ---
 

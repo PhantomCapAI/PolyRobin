@@ -60,7 +60,11 @@ safety gates, and guides @bankrbot — it does not execute trades itself.
 
 ### Robinhood Chain emphasis (realistic)
 
-Robinhood Chain is a priority venue for PolyRobin, with an honest scope:
+Robinhood Chain is a priority venue for PolyRobin, with an honest scope. The
+one-line split, so nobody is confused: **funding, bridging, swaps, and tokenized
+assets are live on Robinhood Chain today; prediction-market *execution* is still
+mostly Polymarket.** Robinhood Chain / Meridian Predict prediction markets are
+**discovery + analysis** for now, not native execution.
 
 - **Tokenized stocks, swaps, and bridging** → PolyRobin guides these through
   BankrBot's **already-live** Robinhood Chain support.
@@ -192,7 +196,7 @@ existing rails.
 | **Tokenized stock events** | Earnings, listings, corporate actions | RH Chain (Meridian Predict) | **Analysis now; Polymarket fallback where an equivalent exists** |
 | **Weather & misc events** | Climate thresholds, scheduled catalysts | Polymarket | Polymarket (live) |
 
-**Honest scope:** Meridian Predict is new. PolyRobin gives you first-class
+**Honest scope:** Meridian Predict is new. PolyRobin gives you priority-grade
 *discovery and analysis* for Robinhood Chain prediction markets today, and executes
 where BankrBot already can (Polymarket, and RH-Chain tokenized stocks/swaps/
 bridging). It will clearly say when a market is analysis-only.
@@ -297,6 +301,23 @@ you post or reply mentioning him, and he responds to you **on X** with the analy
 the math, and a confirmation prompt before anything moves. Every example below is a
 message you send to `@bankrbot`. It always explains its reasoning and asks for
 confirmation before anything that moves money.
+
+### ▶️ Demo quick-start (safe, no funds move)
+
+A four-message sequence that shows the whole brain without risking a live fill —
+each step ends in analysis or a `Confirm?` prompt, never an auto-execution. Dry-run
+it privately first; BankrBot's live phrasing may vary.
+
+```
+@bankrbot using the polyrobin skill, list your 7 safety gates
+@bankrbot using the polyrobin skill, find high-volume crypto markets on Polymarket resolving this week
+@bankrbot using the polyrobin skill, give me your independent probability and edge on "<clean, liquid market>" and show the math
+@bankrbot using the polyrobin skill, size a $20 bet on that and show all 7 gates — but do not place it yet
+```
+
+Pick a market with **unambiguous resolution and deep liquidity** (a major fight, or
+"BTC above $X on <date>") for the analysis step — that's where PolyRobin shines and
+is least likely to surprise you on stage.
 
 ### 🔎 Discovery
 

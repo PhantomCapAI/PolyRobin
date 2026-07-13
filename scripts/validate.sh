@@ -84,6 +84,64 @@ for key in ["risk", "venues", "rails", "execution"]:
         print(f"❌ examples/config.yaml missing top-level key: {key}", file=sys.stderr)
         sys.exit(1)
 print("✅ examples/config.yaml parses and has expected keys")
+
+# --- Config values must sit inside the SAFE gate bands ----------------------
+# Loosening a gate beyond its safe band should require a deliberate, loud override
+# — the sample config must never ship outside these bounds.
+risk = cfg.get("risk", {}) or {}
+# key: (min_inclusive, max_inclusive, human label)
+bands = {
+    "daily_loss_limit":     (0.0, 0.10, "gate 1 daily loss limit"),
+    "max_per_market":       (0.0, 0.25, "gate 2 max per market"),
+    "max_per_category":     (0.0, 0.50, "gate 3 max per category"),
+    "conviction_threshold": (50,  100,  "gate 4a conviction threshold"),
+    "min_edge":             (0.01, 1.0, "gate 4b min edge"),
+    "total_deployed_cap":   (0.0, 0.90, "gate 6 total deployed cap"),
+    "min_liquidity_usd":    (10000, 10**9, "gate 7 liquidity floor"),
+    "min_volume_usd":       (50000, 10**9, "gate 7 volume floor"),
+    "kelly_fraction":       (0.0, 0.5,  "fractional Kelly"),
+}
+errors = []
+for k, (lo, hi, label) in bands.items():
+    if k not in risk:
+        errors.append(f"risk.{k} ({label}) is missing")
+        continue
+    v = risk[k]
+    if not isinstance(v, (int, float)) or isinstance(v, bool):
+        errors.append(f"risk.{k} ({label}) must be a number, got {v!r}")
+    elif not (lo <= v <= hi):
+        errors.append(f"risk.{k} ({label})={v} is outside the safe band [{lo}, {hi}]")
+
+# Gate 5 (confirmation) can never be disabled in the shipped config.
+if risk.get("confirm_all_material_actions") is not True:
+    errors.append("risk.confirm_all_material_actions (gate 5) MUST be true — it cannot be disabled")
+
+if errors:
+    for e in errors:
+        print(f"❌ {e}", file=sys.stderr)
+    sys.exit(1)
+print("✅ config risk values are within safe gate bands (gate 5 locked on)")
+
+# --- Sample Rationale Card must be valid & well-formed ----------------------
+import json, os
+rc_path = os.path.join(os.path.dirname(config_path), "rationale-card.json")
+if os.path.exists(rc_path):
+    try:
+        rc = json.load(open(rc_path, encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        print(f"❌ examples/rationale-card.json is not valid JSON: {e}", file=sys.stderr)
+        sys.exit(1)
+    gates = rc.get("gates")
+    if not isinstance(gates, list) or len(gates) != 7:
+        print("❌ rationale-card.json must document all 7 gates", file=sys.stderr)
+        sys.exit(1)
+    g5 = next((g for g in gates if g.get("id") == 5), None)
+    if not g5 or "onfirmation" not in str(g5.get("name", "")):
+        print("❌ rationale-card.json gate 5 must be the confirmation gate", file=sys.stderr)
+        sys.exit(1)
+    print("✅ examples/rationale-card.json is valid (7 gates, confirmation gate present)")
+else:
+    print("ℹ️  examples/rationale-card.json not found — skipping sample-output check")
 PYEOF
 
 pass "All validations passed"
