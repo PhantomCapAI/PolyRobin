@@ -39,9 +39,8 @@ receipts:
 If there's no edge, PolyRobin says so and stops. "Standing down" is a frequent and
 **correct** output.
 
-PolyRobin acts purely as a decision-making co-pilot and analyst. It does not
-execute trades itself — it guides @bankrbot, which handles actual execution on
-Polymarket and Robinhood Chain.
+PolyRobin is a decision-making co-pilot only. It analyzes, scores edges, applies
+safety gates, and guides @bankrbot — it does not execute trades itself.
 
 ### What PolyRobin is (and isn't)
 
@@ -222,7 +221,8 @@ confirmation before anything that moves money.
 ### 📈 Trading (always confirmed)
 
 ```
-@bankrbot using the polyrobin skill, should I put $20 on <fighter> tonight? size it and show the math
+@bankrbot using the polyrobin skill, put $20 on McGregor to win the next fight
+@bankrbot using the polyrobin skill, should I bet on <fighter> tonight? size it and show the math
 @bankrbot using the polyrobin skill, place $20 YES on "<market>" if the edge still holds   (→ asks you to confirm)
 @bankrbot using the polyrobin skill, exit my position in "<market>"
 @bankrbot using the polyrobin skill, claim my resolved winnings
