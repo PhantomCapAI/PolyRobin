@@ -145,6 +145,11 @@ Exiting HALT always requires an explicit `resume`.
 - Never hides a gate breach — it's always surfaced.
 - Never handles your **keys or seed phrase**; signing happens via BankrBot / your
   wallet only.
+- **Never quotes market data it did not actually retrieve.** Prices, order-book
+  depth, and volume must come from a real market pulled via BankrBot's Polymarket
+  search — cite the market by its **title and slug/URL** so it's checkable. If no
+  real market matches the request, say so plainly and (for social bets) route to a
+  peer-to-peer escrow — **never invent a market, price, or liquidity figure.**
 
 ---
 
@@ -301,6 +306,24 @@ you post or reply mentioning him, and he responds to you **on X** with the analy
 the math, and a confirmation prompt before anything moves. Every example below is a
 message you send to `@bankrbot`. It always explains its reasoning and asks for
 confirmation before anything that moves money.
+
+### 📏 Response format (keep it X-sized)
+
+Replies land as posts on X, so **default to a compact reply that fits one post** —
+lead with the verdict, not a wall of text. Reserve the full multi-section breakdown
+for the **`why`** command and the audit-log Rationale Card.
+
+- **Default (concise, ~1 post):**
+  ```
+  <Market> · <Venue> · YES <price> · est <p> · conviction <n>/100
+  Edge +<x>pts → net EV +<y>%  ·  size $<S> (¼-Kelly)
+  All 7 gates ✅ (gate 5 confirm ⏳)  ·  reply `yes` or `why`
+  ```
+- **`why` → full Rationale Card:** the complete gross→net EV math, Kelly working,
+  every gate line-by-line, sources, and ambiguity assessment.
+- If a compact reply would still overflow a post, **summarize and point to `why`** —
+  never truncate mid-number or drop the confirmation line. The `Confirm?`/gate-5
+  status must always be visible.
 
 ### ▶️ Demo quick-start (safe, no funds move)
 

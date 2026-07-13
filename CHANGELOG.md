@@ -14,7 +14,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   gates and rounded down. Includes a worked check. Fixes an observed live error where
   BankrBot reported a wildly overstated "full Kelly" (~0.56 vs. the correct ~0.20).
 
+### Added
+- **X-sized response format** — `SKILL.md` now instructs a **compact default reply**
+  that fits one X post (verdict + one-line EV/size + one-line gate summary + `yes`/
+  `why`), with the full multi-section Rationale Card reserved for the `why` command.
+  Prevents truncated/spammy replies on X while keeping full transparency on demand.
+
 ### Changed
+- **Data-integrity non-negotiable** — PolyRobin must never quote a price, depth, or
+  volume it didn't actually retrieve; it must cite the real market by title + slug/
+  URL, and if no real market matches, say so and route social bets to escrow rather
+  than inventing a market or its numbers.
 - **Flag requested sizes above ¼-Kelly** — `SKILL.md` now instructs that if a user
   names a size larger than the volatility-adjusted ¼-Kelly recommendation, it's
   honored only if it still clears every gate and is **explicitly flagged** (e.g.
