@@ -6,7 +6,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Changed
+### Changed (grounded co-pilot rework)
+- Reframed PolyRobin as a **decision co-pilot / behavior spec on top of BankrBot's
+  existing rails** — explicitly not executable code and not an autonomous trader.
+- Execution scope made realistic: Polymarket betting and Robinhood Chain tokenized
+  stocks/swaps/bridging run through BankrBot; **Meridian Predict is discovery +
+  analysis only** for now, with Polymarket fallback where an equivalent exists.
+- Example Commands rewritten in natural-language `@bankrbot` style.
+- Integration Hooks split into "rails BankrBot already supports" vs "PolyRobin's
+  own analysis layer".
+- Config restructured to decision parameters only (`venues` + `rails`), no keys.
+- Added `bankrbot` tag.
+
+### Changed (earlier iterations)
 - Reworked the skill around a dual-venue model with **Robinhood Chain as a
   first-class home venue** (Meridian Predict + tokenized event markets)
   alongside Polymarket.

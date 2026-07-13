@@ -79,7 +79,7 @@ except yaml.YAMLError as e:
     print(f"❌ examples/config.yaml is not valid YAML: {e}", file=sys.stderr)
     sys.exit(1)
 
-for key in ["risk", "integrations", "bridge"]:
+for key in ["risk", "venues", "rails"]:
     if key not in cfg:
         print(f"❌ examples/config.yaml missing top-level key: {key}", file=sys.stderr)
         sys.exit(1)
