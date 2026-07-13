@@ -74,7 +74,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   today on memes") into structured terms (condition, amount, parties, resolution
   criteria, deadline, source), writes a fair and verifiable resolution statement,
   and suggests the best execution path: a real custom market (Polymarket /
-  Meridian Predict / Hunch) where one exists, otherwise a peer-to-peer escrow via
+  Rothera / Hunch) where one exists, otherwise a peer-to-peer escrow via
   BankrBot wallet tools (escrow contract, multisig, or simple conditional
   transfer). Runs the full 7 safety gates — confirmation required before any funds
   move — and tracks/auto-settles on resolution. Includes a dedicated section,
@@ -93,7 +93,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Reframed PolyRobin as a **decision co-pilot / behavior spec on top of BankrBot's
   existing rails** — explicitly not executable code and not an autonomous trader.
 - Execution scope made realistic: Polymarket betting and Robinhood Chain tokenized
-  stocks/swaps/bridging run through BankrBot; **Meridian Predict is discovery +
+  stocks/swaps/bridging run through BankrBot; **Rothera is discovery +
   analysis only** for now, with Polymarket fallback where an equivalent exists.
 - Example Commands rewritten in natural-language `@bankrbot` style.
 - Integration Hooks split into "rails BankrBot already supports" vs "PolyRobin's
@@ -101,7 +101,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Config restructured to decision parameters only (`venues` + `rails`), no keys.
 - Added `bankrbot`, `social-bets`, and `friend-bets` tags.
 - Reworked the skill around a dual-venue model with **Robinhood Chain as a
-  first-class home venue** (Meridian Predict + tokenized event markets)
+  first-class home venue** (Rothera + tokenized event markets)
   alongside Polymarket.
 - Frontmatter: single-sentence description, focused tag set, added
   `visibility: public`.
