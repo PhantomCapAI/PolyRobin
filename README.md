@@ -15,6 +15,11 @@ trade requires your explicit confirmation.
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![Safety](https://img.shields.io/badge/mode-safety--first-critical)](#-safety-cheat-sheet)
 
+> **New to Polymarket?** Trade on the largest prediction market →
+> **[polymarket.com](https://polymarket.com/?r=PolyRobin)**
+> *(referral link — signing up through it supports PolyRobin's development. Not an
+> endorsement to trade; markets are risky and can lose 100% of stake.)*
+
 ---
 
 ## Table of Contents
