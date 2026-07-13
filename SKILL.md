@@ -1,8 +1,8 @@
 ---
 name: PolyRobin
-description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain that builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
-tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, risk-management, bankrbot]
-version: 1.0.0
+description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain that builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, turns natural-language social & friend bets into fair verifiable wagers, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
+tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, social-bets, friend-bets, risk-management, bankrbot]
+version: 1.1.0
 visibility: public
 author: PolyRobin Labs
 license: MIT
@@ -48,6 +48,11 @@ safety gates, and guides @bankrbot — it does not execute trades itself.
   conviction scoring, sizing, risk gating, and transparent reasoning.
 - ✅ **An execution *guide*.** It hands BankrBot a clear, confirmed instruction
   ("place $20 YES on market X") and monitors the result.
+- ✅ **A social-bet translator.** It turns a natural-language friend/group wager
+  ("bet $100 my friend Tony loses $100 today on memes") into a fair, verifiable
+  resolution statement and routes it to the best execution path — a real custom
+  market where one exists, or a peer-to-peer escrow bet via BankrBot's wallet rails
+  otherwise.
 - ❌ **Not an autonomous trader.** It never bets, bridges, or hedges without your
   explicit `yes`.
 - ❌ **Not a new venue or new smart contract.** It uses BankrBot's existing
@@ -194,6 +199,97 @@ bridging). It will clearly say when a market is analysis-only.
 
 ---
 
+## Social & Friend Bets
+
+Not every wager lives on a listed market. PolyRobin turns a casual, natural-language
+bet between friends into a **fair, transparent, verifiable** wager — and then finds
+the safest way to actually run it. This is the same analyst brain applied to social
+stakes: parse it precisely, write an unambiguous resolution, route it well, and
+settle it honestly.
+
+> Social bets are still **real money**. Every one runs through the same 7 safety
+> gates — most importantly **gate 5 (explicit confirmation)** before any funds move,
+> and the same refusal to touch **ambiguous or manipulable resolution criteria**.
+
+### What PolyRobin does with a social bet
+
+For any message like *"bet $100 my friend Tony loses $100 today on memes"*, PolyRobin:
+
+1. **Parses the bet into structured terms** — it extracts and reads back:
+   - **Condition** — the exact thing being wagered on.
+   - **Amount & stake per side** — who risks what.
+   - **Parties** — you, named friends, `@handles`, or an open group.
+   - **Resolution criteria & deadline** — the measurable trigger and the cutoff
+     (e.g. "today" → end of day in a stated timezone).
+   - **Resolution source** — the objective feed/record that decides it (onchain PnL,
+     a wallet's realized loss, a token's price, a public post, etc.).
+2. **Writes a fair resolution statement** — a single plain-English sentence that both
+   sides agree to *before* money moves, with no wiggle room. If the bet as phrased is
+   subjective or manipulable ("*ape into a rug*", "*a meme pumps*"), PolyRobin
+   proposes a concrete, objective proxy and asks you to confirm the wording — it will
+   **not** run a bet it can't resolve cleanly.
+3. **Suggests the best execution path** (in priority order):
+   - **Real custom market first.** If the condition can be expressed as a listed or
+     custom market, guide it to **Polymarket / Meridian Predict / Hunch** — best
+     liquidity, neutral resolution, no counterparty trust needed. (RH-Chain /
+     Meridian prediction markets remain **analysis-and-routing only** for now; where
+     they aren't executable, PolyRobin falls back to Polymarket and says so.)
+   - **Peer-to-peer escrow otherwise.** If it's genuinely a between-friends bet with
+     no market, propose a P2P escrow using **BankrBot's wallet tools**:
+     - an **escrow contract** holding both stakes until the resolution source fires,
+     - a **multisig** where an agreed resolver (or 2-of-3 with a neutral third) signs
+       the payout, or
+     - a **simple conditional transfer** for low-stakes, high-trust bets.
+     PolyRobin recommends the lightest option that fits the stake and trust level, and
+     always names the chain explicitly (**Robinhood Chain** for escrow/transfers,
+     per the routing rules above).
+4. **Confirms, then tracks and settles.** After your explicit `yes`, it records the
+   bet as a **Rationale Card** in `~/.polyrobin/audit/`, monitors the resolution
+   source, and when the deadline hits it **auto-notifies both parties, declares the
+   outcome against the agreed statement, and guides settlement/release of escrow** —
+   always with a final confirmation before funds actually move.
+
+### Worked example
+
+> **You:** *"bet $100 my friend Tony loses $100 today on memes"*
+>
+> **PolyRobin:**
+> **Bet parsed** →
+> • **Condition:** Tony's realized loss on meme-coin trades reaches **≥ $100**.
+> • **Stakes:** You $100 vs. Tony $100 (even, winner takes $200 pool).
+> • **Parties:** You & Tony (needs Tony's wallet + agreement).
+> • **Deadline:** **today, 23:59 America/New_York**.
+> • **Resolution source:** realized PnL on Tony's stated wallet across meme-coin
+>   trades, from onchain records — **needs a confirmed wallet address + the meme-coin
+>   set defined up front** so it isn't ambiguous.
+> **Proposed resolution statement:** *"YES (you win) if, by 23:59 ET today, Tony's
+> realized loss on the agreed meme-coin list from wallet 0x… is ≥ $100; otherwise
+> Tony wins."*
+> **Execution:** No clean listed market for this → **P2P escrow on Robinhood Chain**:
+> both stake $100 into an escrow contract; a 2-of-3 multisig (you, Tony, neutral)
+> releases $200 to the winner at the deadline.
+> **Gates:** all 7 checked; **confirmation required** before any funds lock. ✅
+> **Confirm?** Reply `yes` to draft the escrow (nothing moves until you and Tony both
+> sign), or `edit` to change any term.
+
+### Fairness & safety rules for social bets
+
+- **Objective, agreed, timestamped resolution or no bet.** Both sides confirm the
+  exact statement, source, and deadline before anything locks.
+- **No trust assumptions when money is at stake.** Prefer a real market or an escrow/
+  multisig over a bare promise; reserve simple conditional transfers for small,
+  high-trust stakes and say so.
+- **Confirmation is never skipped** (gate 5) — for locking stakes *and* for releasing
+  the payout.
+- **Neutral resolution.** Prefer a public, verifiable source; if a human resolver is
+  needed, prefer a neutral third party or 2-of-3 multisig over one interested party.
+- **Refuse the unresolvable.** Vague, subjective, or manipulable conditions get a
+  concrete proxy proposed, or a stand-down — never a hand-wave.
+- **Self-harm / bad-faith guard.** PolyRobin won't structure bets designed to
+  pressure someone into reckless trading; it frames stakes it can fairly settle.
+
+---
+
 ## Example Commands
 
 PolyRobin is invoked in natural language through `@bankrbot`. Every example below
@@ -226,6 +322,18 @@ confirmation before anything that moves money.
 @bankrbot using the polyrobin skill, place $20 YES on "<market>" if the edge still holds   (→ asks you to confirm)
 @bankrbot using the polyrobin skill, exit my position in "<market>"
 @bankrbot using the polyrobin skill, claim my resolved winnings
+```
+
+### 🤝 Social & Friend Bets (always confirmed)
+
+```
+@bankrbot using the polyrobin skill, bet $100 my friend Tony loses $100 today on memes
+@bankrbot using the polyrobin skill, I bet $50 that @DipWheeler will ape into a rug before EOD
+@bankrbot using the polyrobin skill, create a group bet: first one to lose 10% on degen trades owes dinner
+@bankrbot using the polyrobin skill, turn "ETH flips $4k before Friday" into a fair bet with my group
+@bankrbot using the polyrobin skill, set up a P2P escrow so @jess and I can settle our bet on Robinhood Chain
+@bankrbot using the polyrobin skill, what's the status of my bet with Tony and has it resolved yet?
+@bankrbot using the polyrobin skill, resolve and settle my bet with @DipWheeler
 ```
 
 ### 📊 Monitoring
@@ -332,6 +440,16 @@ rails:
   suggest de-risking as it approaches.
 - **Wallet anomaly** → kill-switch + security alert; human required.
 - **Sub-minimum / dust size** → refuse, never round up.
+- **Vague social bet** ("*ape into a rug*", "*loses on memes*") → propose a concrete,
+  objective resolution proxy and confirm the wording before locking any stake; never
+  run a bet it can't settle cleanly.
+- **Counterparty won't sign / no wallet** → hold both stakes in escrow only once all
+  parties have agreed and signed; if a side never commits, nothing locks and PolyRobin
+  reports the bet as unstarted.
+- **Social-bet resolution source disputed** → prefer a neutral third-party or 2-of-3
+  multisig resolver; if the outcome is genuinely contested against the agreed
+  statement, escrow stays locked and a human decides — funds never auto-release on a
+  disputed result.
 
 ---
 
