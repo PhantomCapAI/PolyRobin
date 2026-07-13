@@ -18,10 +18,13 @@ pass() { echo "✅ $1"; }
 PY="$(command -v python3 || command -v python || true)"
 [ -n "$PY" ] || fail "python3 (or python) is required to validate YAML"
 
-"$PY" - "$SKILL" "$CONFIG" <<'PYEOF'
-import sys, re
+CATALOG="$ROOT/catalog.json"
+[ -f "$CATALOG" ] || fail "catalog.json not found at $CATALOG (required by BankrBot discovery)"
 
-skill_path, config_path = sys.argv[1], sys.argv[2]
+"$PY" - "$SKILL" "$CONFIG" "$CATALOG" <<'PYEOF'
+import sys, re, json
+
+skill_path, config_path, catalog_path = sys.argv[1], sys.argv[2], sys.argv[3]
 
 try:
     import yaml
@@ -79,11 +82,33 @@ except yaml.YAMLError as e:
     print(f"❌ examples/config.yaml is not valid YAML: {e}", file=sys.stderr)
     sys.exit(1)
 
-for key in ["risk", "venues", "rails"]:
+for key in ["risk", "venues", "rails", "execution"]:
     if key not in cfg:
         print(f"❌ examples/config.yaml missing top-level key: {key}", file=sys.stderr)
         sys.exit(1)
 print("✅ examples/config.yaml parses and has expected keys")
+
+# --- catalog.json (BankrBot discovery metadata) -----------------------------
+try:
+    cat = json.load(open(catalog_path, encoding="utf-8"))
+except json.JSONDecodeError as e:
+    print(f"❌ catalog.json is not valid JSON: {e}", file=sys.stderr)
+    sys.exit(1)
+
+if cat.get("schemaVersion") != 1:
+    print("❌ catalog.json: schemaVersion must be 1", file=sys.stderr)
+    sys.exit(1)
+if cat.get("slug") != "polyrobin":
+    print(f"❌ catalog.json: slug must be 'polyrobin', got {cat.get('slug')!r}", file=sys.stderr)
+    sys.exit(1)
+for key in ["provider", "logo", "install"]:
+    if not cat.get(key):
+        print(f"❌ catalog.json missing required field: {key}", file=sys.stderr)
+        sys.exit(1)
+if not cat["install"].get("command"):
+    print("❌ catalog.json: install.command is required", file=sys.stderr)
+    sys.exit(1)
+print(f"✅ catalog.json OK (slug={cat['slug']}, install.type={cat['install'].get('type')})")
 PYEOF
 
 pass "All validations passed"

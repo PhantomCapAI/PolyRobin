@@ -40,10 +40,22 @@ venues:
     execution: false                 # analysis-only for now (new venue)
     fallback: polymarket             # execute equivalent on Polymarket where it exists
 
+# --- Execution routing & chain targeting ------------------------------------
+# Prevents the "landed on Base instead of Robinhood Chain" failure mode.
+execution:
+  default_chain: robinhood-chain     # everything below routes here by default
+  forbid_silent_fallback: true       # never fall back to another chain without asking
+  bet_execution_chain: polygon       # the ONE exception: Polymarket bets
+  per_action_chain:
+    morpho_lend_borrow: robinhood-chain   # NOT base
+    swap: robinhood-chain                 # NOT base
+    bridge: robinhood-chain               # destination
+    tokenized_stocks: robinhood-chain     # NOT base
+
 # --- Rails PolyRobin can guide (all live in BankrBot) -----------------------
 rails:
   hyperliquid: hedging               # perp hedges (on confirmation)
-  morpho: financing                  # borrow/lend financing or hedge
+  morpho: financing                  # borrow/lend financing or hedge — on Robinhood Chain
   bridging:
     destination: robinhood-chain     # guide bridging funds INTO RH Chain
     routing: optimal

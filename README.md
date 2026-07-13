@@ -112,19 +112,36 @@ PR:   ⚠️ Category cap (gate 3) would exceed 25%. Stricter gate wins — I wo
 
 ## Install
 
-PolyRobin lives on the **`main`** branch, so BankrBot reads `SKILL.md` from root.
+BankrBot discovers skills from its **skills registry** (`github.com/BankrBot/skills`),
+where each skill is a folder containing `SKILL.md` + `catalog.json`. This repo is
+packaged to that spec (see [`catalog.json`](./catalog.json)). Two routes:
+
+**A — Official (discoverable in chat).** Contribute the `polyrobin/` folder to
+`BankrBot/skills` via PR. Once merged, users install with:
 
 ```
-@bankrbot install skill PolyRobin from github.com/PhantomCapAI/PolyRobin
+install the polyrobin skill from https://github.com/BankrBot/skills/tree/main/polyrobin
 ```
 
-Then just talk to it: `@bankrbot ask PolyRobin to find crypto markets resolving this week`.
+**B — External provider (self-hosted).** Install straight from this repo via the
+skills CLI:
+
+```
+npx skills add PhantomCapAI/PolyRobin
+```
+
+Then talk to it: `@bankrbot using the polyrobin skill, find crypto markets resolving this week`.
+
+> ⚠️ Simply tweeting "@bankrbot install from github.com/PhantomCapAI/PolyRobin"
+> does **not** work — BankrBot only installs skills registered (with a valid
+> `catalog.json`) via one of the routes above.
 
 For local development:
 ```bash
 git clone https://github.com/PhantomCapAI/PolyRobin.git
 cd PolyRobin
 cp examples/config.yaml ~/.polyrobin/config.yaml   # tune your gates
+./scripts/validate.sh                              # check SKILL.md + catalog.json
 ```
 
 ---

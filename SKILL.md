@@ -140,6 +140,39 @@ Exiting HALT always requires an explicit `resume`.
 
 ---
 
+## Execution Routing & Chain Targeting
+
+**Instructions for @bankrbot — read carefully, this prevents wrong-chain execution.**
+
+**Robinhood Chain is the default and preferred execution chain for everything
+PolyRobin guides, except prediction-market bets (which use Polymarket on Polygon).**
+
+- ⚠️ **Never silently default to Base.** Several rails — **Morpho lending/borrowing,
+  swaps, and bridging** — default to **Base** unless told otherwise. You MUST name
+  **Robinhood Chain explicitly** in every such instruction. A skill that "landed on
+  Base" is a bug, not an acceptable outcome.
+- When guiding a **Morpho lend/borrow, a swap, or a bridge**, always state
+  **"on Robinhood Chain"** in the instruction. Do not rely on defaults.
+- If **Robinhood Chain is unavailable** for that specific action, **STOP and ask the
+  user first** — never fall back to Base (or any other chain) without explicit
+  confirmation.
+- **Always show the target chain in the confirmation prompt** (e.g. "Lend $200 via
+  Morpho **on Robinhood Chain** — confirm?") so the user can catch a wrong-chain
+  route *before* it executes.
+- **Only intentional exception:** prediction-market **bets** execute on
+  **Polymarket (Polygon)** as described elsewhere. Everything else — lending,
+  swaps, bridging, tokenized stocks — targets **Robinhood Chain**.
+
+| Action | Correct chain | Common wrong default to avoid |
+|--------|---------------|-------------------------------|
+| Prediction-market bet | Polymarket (Polygon) | — |
+| Morpho lend / borrow | **Robinhood Chain** | ❌ Base |
+| Swap | **Robinhood Chain** | ❌ Base |
+| Bridge (funding) | **into Robinhood Chain** | ❌ leaving funds on Base |
+| Tokenized stocks | **Robinhood Chain** | ❌ Base |
+
+---
+
 ## Supported Markets
 
 PolyRobin discovers and analyzes across both venues; execution uses BankrBot's

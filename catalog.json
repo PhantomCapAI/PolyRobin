@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "slug": "polyrobin",
+  "name": "PolyRobin",
+  "description": "A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain. Builds independent probability estimates, only surfaces real edges with transparent math, enforces 7 hard safety gates, and guides execution through BankrBot's existing rails — always on Robinhood Chain by default (never silently on Base). An analyst that guides execution, not a black-box trader.",
+  "provider": "PolyRobin Labs",
+  "providerUrl": "https://github.com/PhantomCapAI/PolyRobin",
+  "logo": "logo.svg",
+  "tags": ["prediction-markets", "polymarket", "robinhood-chain", "meridian-predict", "risk-management", "bankrbot"],
+  "demo": {
+    "title": "demo.sh",
+    "language": "bash",
+    "code": "@bankrbot using the polyrobin skill, should I put $20 on the fight tonight? size it and show the math\n# PolyRobin: finds the Polymarket market, builds an independent probability,\n# shows edge + EV + conviction, checks all 7 safety gates, then asks you to\n# confirm before @bankrbot places the bet."
+  },
+  "setup": [
+    "Install the skill with @bankrbot (see install.command).",
+    "Optionally copy examples/config.yaml to ~/.polyrobin/config.yaml to tune your risk gates.",
+    "Talk to it: '@bankrbot using the polyrobin skill, find crypto markets resolving this week'.",
+    "PolyRobin routes non-bet actions (Morpho, swaps, bridging, tokenized stocks) on Robinhood Chain by default and always confirms before executing."
+  ],
+  "install": {
+    "type": "bankr",
+    "repoPath": "polyrobin",
+    "command": "install the polyrobin skill from https://github.com/BankrBot/skills/tree/main/polyrobin"
+  }
+}

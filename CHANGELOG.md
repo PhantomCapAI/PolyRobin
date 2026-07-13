@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (installability + chain-safety)
+- **`catalog.json`** — required BankrBot discovery metadata (slug, provider,
+  logo, install command); without it the skill is excluded from the catalog.
+- **`logo.svg`** — square brand mark.
+- **Execution Routing & Chain Targeting** section in `SKILL.md` — forces
+  Robinhood Chain by default and forbids silent fallback to Base for Morpho,
+  swaps, bridging, and tokenized stocks (fixes the "landed on Base" failure mode).
+- `execution` block in the sample config encoding per-action chain targeting.
+- Validator now checks `catalog.json`; README documents the real install routes
+  (registry PR or `npx skills add`), correcting the earlier mention-a-repo myth.
+
 ### Changed (grounded co-pilot rework)
 - Reframed PolyRobin as a **decision co-pilot / behavior spec on top of BankrBot's
   existing rails** — explicitly not executable code and not an autonomous trader.
