@@ -23,6 +23,7 @@ trade requires your explicit confirmation.
 - [🛡️ Safety Cheat Sheet](#-safety-cheat-sheet)
 - [Supported Markets](#supported-markets)
 - [Example Flows](#example-flows)
+- [How funds flow through Polymarket](#how-funds-flow-through-polymarket)
 - [Install](#install)
 - [Configuration](#configuration)
 - [What runs where](#what-runs-where)
@@ -107,6 +108,75 @@ You:  @bankrbot PolyRobin, go bigger on politics
 PR:   ⚠️ Category cap (gate 3) would exceed 25%. Stricter gate wins — I won't size up.
       You can raise the cap explicitly, but I'd advise against it here.
 ```
+
+---
+
+## How funds flow through Polymarket
+
+**Short version: PolyRobin never touches your money.** It decides *whether* and
+*how much*; **BankrBot** carries out the transfer from **your own wallet**, and only
+after you reply `yes`. Prediction-market bets settle on **Polymarket (Polygon)** in
+**USDC** — everything else PolyRobin guides stays on Robinhood Chain.
+
+Here is the full path of a single dollar, using a real Polymarket-style market:
+
+> **Market:** *"How many times will Elon tweet this week?"* — a multi-outcome market
+> split into buckets (e.g. `<100`, `100–149`, `150–199`, `200–249`, `250+`). Each
+> bucket is its own **YES/NO outcome share** that pays **$1 if it's right and $0 if
+> it's wrong**. The price of a share (between $0.00 and $1.00) *is* the market's
+> implied probability — a share at `0.32` means the market thinks that bucket has a
+> ~32% chance.
+
+**1. Analyze (no money moves).** PolyRobin builds its *own* probability for each
+bucket from posting history, recent cadence, and news, compares that to the share
+prices, and looks for a bucket where its estimate beats the price by enough to clear
+the edge gate. If nothing clears, it stands down — no bet.
+
+**2. Size + gate + confirm.** For the bucket with an edge (say **`150–199`** priced
+at `0.28` while PolyRobin estimates `0.38`), it computes a fractional-Kelly size,
+runs all **7 safety gates**, and shows you the math. **Nothing is spent yet** — gate
+5 requires your explicit `yes`.
+
+**3. Fund the venue.** Bets need **USDC on Polygon** (Polymarket's collateral).
+Robinhood Chain is your home base, so if that's where your funds sit, BankrBot
+**bridges the USDC into Polygon first**, and PolyRobin accounts for bridge latency in
+time-sensitive markets. Your keys stay yours — PolyRobin never holds them.
+
+**4. Place the order (your funds, your signature).** On your `yes`, BankrBot submits
+the order to Polymarket's on-chain order book and spends **your USDC to buy YES
+shares of the `150–199` bucket** at the going price. Example: $28 buys 100 shares at
+`0.28`. The shares sit in **your** Polymarket position — a contract *you* control,
+not PolyRobin and not a PolyRobin-held pool.
+
+**5. Resolve.** At week's end, Polymarket's resolution mechanism (the **UMA optimistic
+oracle**) records the actual tweet count. Exactly one bucket wins. **Winning shares
+redeem 1-for-$1; losing shares go to $0.** If Elon posted 172 times, your 100
+`150–199` shares are now worth **$100** (bought for $28).
+
+**6. Settle back.** PolyRobin tracks the resolution, notifies you, and — again only on
+your `yes` — has BankrBot **redeem the winning shares back to USDC** in your wallet,
+which can then bridge back to Robinhood Chain. Every step is written to a Rationale
+Card in `~/.polyrobin/audit/`.
+
+```
+Your wallet (USDC)
+   │  ┌── PolyRobin: estimate → edge → size → 7 gates ─┐   (no funds move)
+   │  └──────────────── you reply `yes` ───────────────┘
+   ▼
+[BankrBot] bridge USDC → Polygon ──► buy YES shares of the chosen bucket on Polymarket
+   ▼
+Your Polymarket position (shares you control)
+   ▼
+UMA oracle resolves ──► winning shares redeem $1 each, losers $0
+   ▼
+[BankrBot] redeem → USDC back in your wallet  (you confirm)  ──► optional bridge home
+```
+
+**What you actually pay:** the cost of the shares (your stake) plus Polygon network
+gas and any spread/slippage between the quoted and filled price — PolyRobin folds
+those into the net-EV math *before* asking you to confirm, so the edge it quotes is
+after costs, not before. It never fronts, pools, or custodies funds, and it will not
+size a bet it can't cleanly exit (gate 7).
 
 ---
 
