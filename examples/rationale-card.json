@@ -52,29 +52,31 @@
     "market_price_yes": 0.52,
     "raw_edge_pts": 0.06,
     "gross_ev_pct": 11.5,
-    "gross_ev_formula": "(0.58 / 0.52) - 1 = 0.1154",
+    "gross_ev_formula": "EV_gross = (p - c) / c = (0.58 - 0.52) / 0.52 = 0.1154",
     "fees_pct": 0.0,
-    "est_slippage_pct": 1.2,
-    "net_ev_pct": 4.9,
-    "net_ev_formula": "gross_ev - slippage buffer, on a marginal $20 fill at quoted depth",
-    "notes": "Net EV clears the +4% gate with limited headroom; size kept conservative accordingly."
+    "est_slippage_pct": 0.0,
+    "slippage_notes": "$20 order is far smaller than ~$120k book depth, so slippage is negligible (~0). Polymarket trading fee ~0.",
+    "net_ev_pct": 11.5,
+    "net_ev_formula": "EV_net = EV_gross - slippage - fees = 11.5 - ~0 - 0 = ~11.5%",
+    "notes": "Net EV clears the +4% gate comfortably; size still kept conservative."
   },
   "size_math": {
     "bankroll_usd": 1000.0,
+    "kelly_formula": "f* = (p - c) / (1 - c) = (0.58 - 0.52) / (1 - 0.52) = 0.125",
+    "full_kelly_fraction_of_bankroll": 0.125,
     "kelly_fraction_setting": 0.25,
-    "full_kelly_fraction_of_bankroll": 0.083,
-    "fractional_kelly_fraction_of_bankroll": 0.021,
+    "fractional_kelly_fraction_of_bankroll": 0.031,
     "volatility_adjustment": 0.95,
-    "raw_size_usd": 19.9,
+    "raw_size_usd": 29.7,
     "recommended_size_usd": 20.0,
     "pct_of_bankroll": 0.02,
-    "notes": "1/4-Kelly on a +4.9% edge, volatility-trimmed, rounded to $20. Well inside the per-market cap."
+    "notes": "1/4-Kelly (0.031 x $1000 = ~$31), volatility-trimmed to ~$29.7, then rounded DOWN to a conservative $20 -- well inside the 10% per-market cap."
   },
   "gates": [
     { "id": 1, "name": "Daily loss limit", "threshold": "5% of bankroll", "status": "PASS", "detail": "Day drawdown 0.0%; no HALT." },
     { "id": 2, "name": "Max exposure per market", "threshold": "10% of bankroll", "status": "PASS", "detail": "$20 = 2.0% of bankroll." },
     { "id": 3, "name": "Max exposure per category", "threshold": "25% of bankroll", "status": "PASS", "detail": "Sports category exposure 2.0% after this bet." },
-    { "id": 4, "name": "Conviction + edge threshold", "threshold": "conviction >= 65 AND net EV >= +4%", "status": "PASS", "detail": "Conviction 68 and net EV +4.9%; both clear." },
+    { "id": 4, "name": "Conviction + edge threshold", "threshold": "conviction >= 65 AND net EV >= +4%", "status": "PASS", "detail": "Conviction 68 and net EV ~+11.5%; both clear." },
     { "id": 5, "name": "Confirmation requirement", "threshold": "always on", "status": "PENDING", "detail": "Awaiting explicit user 'yes' before any execution. Cannot be bypassed." },
     { "id": 6, "name": "Total deployed capital cap", "threshold": "60% of bankroll", "status": "PASS", "detail": "Deployed 12% -> 14% after this bet." },
     { "id": 7, "name": "Liquidity / exitability floor", "threshold": "$50k depth AND $250k volume", "status": "PASS", "detail": "Depth ~$120k, volume ~$1.4M; exitable." }

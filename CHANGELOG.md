@@ -7,6 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **`Sizing & EV — exact formulas` section in `SKILL.md`** — pins down the math so
+  BankrBot computes it correctly and reproducibly: `EV_gross = (p − c)/c`,
+  `EV_net = gross − slippage − fees` (slippage from order size vs. depth; Polymarket
+  fee ≈ 0), and Kelly `f* = (p − c)/(1 − c)` × fractional-Kelly × vol-adj, capped by
+  gates and rounded down. Includes a worked check. Fixes an observed live error where
+  BankrBot reported a wildly overstated "full Kelly" (~0.56 vs. the correct ~0.20).
+
+### Changed
+- **Corrected the sample Rationale Card math** (`examples/rationale-card.{json,md}`):
+  gross→net EV now reconciles (slippage shown, ≈0 when order ≪ depth), Kelly uses the
+  explicit formula, and gate 5 (confirmation) reads PENDING until `yes`.
+
+### Added (earlier)
 - **Sample Rationale Card** — `examples/rationale-card.json` (machine-readable) and
   `examples/rationale-card.md` (human-readable) show a full worked recommendation:
   independent probability, source-tagged inputs, edge/EV math, Kelly size math, all 7
