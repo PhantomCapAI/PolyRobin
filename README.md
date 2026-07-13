@@ -35,6 +35,7 @@ tokenized-asset (RWA) markets.
 - [Autonomy Levels](#autonomy-levels)
 - [Auditability](#auditability)
 - [FAQ](#faq)
+- [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
@@ -375,6 +376,27 @@ PolyRobin abstains rather than average noise or act on old data.
 
 **Can it lose money?** Yes. Prediction markets are speculative; see the
 disclaimer.
+
+---
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). In short:
+
+- Copy [`examples/config.yaml`](./examples/config.yaml) to `~/.polyrobin/config.yaml` to get started.
+- Run `./scripts/validate.sh` before opening a PR (CI runs it too).
+- Safety-relevant changes must document their risk impact.
+- Report vulnerabilities privately per [SECURITY.md](./SECURITY.md).
+
+Repo map:
+
+| Path | What it is |
+|------|------------|
+| [`SKILL.md`](./SKILL.md) | The BankrBot skill definition (source of truth) |
+| [`examples/config.yaml`](./examples/config.yaml) | Annotated sample configuration |
+| [`scripts/validate.sh`](./scripts/validate.sh) | Validates frontmatter, sections, and config |
+| [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) | CI: validation + link check |
+| [`SECURITY.md`](./SECURITY.md) · [`CONTRIBUTING.md`](./CONTRIBUTING.md) · [`CHANGELOG.md`](./CHANGELOG.md) | Project docs |
 
 ---
 

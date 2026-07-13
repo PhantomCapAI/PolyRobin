@@ -1,0 +1,61 @@
+# PolyRobin sample configuration
+# Copy to ~/.polyrobin/config.yaml and adjust. NEVER put private keys here —
+# PolyRobin signs through a user-controlled signer only.
+
+# --- Bankroll & signing -----------------------------------------------------
+bankroll_source: robinhood-chain   # robinhood-chain | polygon | manual
+signer: ledger                     # ledger | walletconnect | keystore
+autonomy: assisted                 # assisted | supervised | autonomous
+
+# --- Risk gates (the seven hard gates) --------------------------------------
+# All values are fractions of bankroll unless suffixed _usd.
+risk:
+  daily_loss_limit: 0.05           # HALT if daily drawdown reaches this
+  max_per_market: 0.10             # cap on any single market
+  max_per_category: 0.25           # cap on a category (crypto/politics/etc.)
+  total_deployed_cap: 0.60         # keep dry powder + margin buffer
+  min_edge: 0.04                   # minimum net EV to consider a trade
+  min_liquidity_usd: 50000         # order-book depth floor
+  min_volume_usd: 250000           # market volume floor
+  confirm_over_usd: 250            # trades above this need human confirmation
+  kelly_fraction: 0.25             # fractional Kelly (¼-Kelly default)
+  max_consecutive_losses: 3        # rolling-24h streak that trips kill-switch
+  feed_staleness_seconds: 90       # pause modeling on data older than this
+
+# --- Strategy toggles (all off except conviction_value) ---------------------
+strategies:
+  conviction_value: on
+  late_snipe: off
+  arbitrage: off
+  event_hedge: off
+  category_basket: off
+  criteria_arb: off
+  rwa_plays: off
+
+# --- Late-snipe tuning (only used if late_snipe is on) ----------------------
+late_snipe:
+  window_hours: 12
+  min_conviction: 75
+
+# --- Integrations -----------------------------------------------------------
+integrations:
+  polymarket:
+    enabled: true
+  robinhood_chain:
+    enabled: true
+    bridge_max_wait_seconds: 600   # treat funds as unavailable beyond this
+  hyperliquid:
+    enabled: false                 # enable for perp hedging / arb
+  morpho:
+    enabled: false                 # enable for borrow/lend hedging
+    health_factor_buffer: 0.15     # alert/de-risk before liquidation
+  notifier:
+    enabled: true
+    channel: cli                   # cli | webhook | push
+    # webhook_url: https://example.com/hook
+
+# --- Audit ------------------------------------------------------------------
+audit:
+  dir: ~/.polyrobin/audit
+  format: both                     # json | human | both
+  retain_days: 365

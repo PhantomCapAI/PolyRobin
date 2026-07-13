@@ -1,0 +1,30 @@
+# PolyRobin local state — never commit runtime data, keys, or audit logs
+.polyrobin/
+*.audit
+audit/
+*.log
+
+# Secrets & keys (PolyRobin never stores keys, but guard anyway)
+.env
+.env.*
+*.key
+*.pem
+*.keystore
+secrets.yaml
+config.local.yaml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Dependencies / build (if tooling is added later)
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
