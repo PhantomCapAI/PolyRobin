@@ -69,11 +69,6 @@ mostly Polymarket.** Robinhood Chain / Rothera prediction markets are
 
 - **Tokenized stocks, swaps, and bridging** → PolyRobin guides these through
   BankrBot's **already-live** Robinhood Chain support.
-  > ⚠️ **Geo-restriction:** Robinhood **Stock Tokens are not available to US persons**
-  > (and are restricted in the UK, Canada, Switzerland, and the UAE). Where the
-  > tokenized-stock rail is unavailable, PolyRobin is **analysis-only** and execution
-  > falls back to **Polymarket**. (Robinhood Chain mainnet — an Arbitrum L2 — went
-  > live July 1 2026.)
 - **Robinhood Chain / Rothera prediction markets** → **discovery and
   analysis only** for now. Rothera (Robinhood + Susquehanna's CFTC-regulated
   prediction exchange) is live, but **BankrBot has no native Rothera execution
@@ -212,8 +207,8 @@ existing rails.
 **Honest scope:** Rothera is live, but **BankrBot has no native Rothera execution
 integration yet**. PolyRobin gives you priority-grade *discovery and analysis* for
 Rothera prediction markets today, and executes where BankrBot already can (Polymarket,
-and RH-Chain tokenized stocks/swaps/bridging where regionally available). It will
-clearly say when a market is analysis-only.
+and RH-Chain tokenized stocks/swaps/bridging). It will clearly say when a market is
+analysis-only.
 
 ---
 

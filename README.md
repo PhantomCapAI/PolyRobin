@@ -53,11 +53,6 @@ markets are **discovery + analysis only for now** (BankrBot has no native Rother
 execution integration yet) — PolyRobin falls
 back to Polymarket for execution where an equivalent market exists, and says so.
 
-> ⚠️ **Geo-restriction:** Robinhood **Stock Tokens are unavailable to US persons**
-> (and restricted in UK/Canada/Switzerland/UAE). Where the tokenized-stock rail is
-> unavailable, US users get **analysis only** and execution **falls back to
-> Polymarket**. (RH Chain mainnet — an Arbitrum L2 — went live July 1 2026.)
-
 ---
 
 ## How you use it
