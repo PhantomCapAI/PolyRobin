@@ -35,9 +35,9 @@ venues:
   robinhood_chain:
     discovery: true
     execution: true                  # tokenized stocks / swaps / bridging via BankrBot
-  meridian_predict:
+  rothera:
     discovery: true
-    execution: false                 # analysis-only for now (new venue)
+    execution: false                 # analysis-only (no native BankrBot Rothera execution yet)
     fallback: polymarket             # execute equivalent on Polymarket where it exists
 
 # --- Execution routing & chain targeting ------------------------------------
