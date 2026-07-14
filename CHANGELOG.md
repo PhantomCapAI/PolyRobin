@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (concise replies — from live BankrBot testing)
+- **Tightened the default reply to be short and high-signal** — hard rules in
+  `SKILL.md`: ≈4 lines / under ~500 chars, one line per component, the "why" is a
+  single clause (no technical-analysis narrative or "this event tracks…" filler),
+  full Rationale Card only on `why`. Same quality, no rambling. Fixes the multi-
+  paragraph walls observed on X.
+
 ### Changed (data-integrity hardening — from live BankrBot testing)
 - **No stated price/volume/depth without a live fetch.** If a figure wasn't actually
   retrieved this turn, PolyRobin cites the market URL and says "verify live at [URL]"
