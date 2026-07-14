@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (analysis ≠ sizing — the bet is the user's choice)
+- **Separated analysis from sizing.** A discovery/analysis request ("show me the
+  markets", "what's the edge on X") now returns **analysis only** — no pre-sized bet,
+  no dollar amount, no "place $X / reply yes." PolyRobin **sizes only when the user
+  explicitly asks to bet**; whether to bet and how much is the user's personal choice.
+- **No invented bankroll / dollar amounts.** A `$` size is only valid off the user's
+  actual known bankroll; otherwise size is shown as a **% of bankroll** and the user
+  is asked for their stake. Fixes observed behavior where "show me the markets"
+  returned "Confirm? place $18" using a bankroll it didn't actually have (the implied
+  bankroll differed market-to-market).
+
 ### Changed (concise replies — from live BankrBot testing)
 - **Tightened the default reply to be short and high-signal** — hard rules in
   `SKILL.md`: ≈4 lines / under ~500 chars, one line per component, the "why" is a
