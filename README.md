@@ -48,9 +48,9 @@ trade requires your explicit confirmation.
 
 **Robinhood Chain (realistic scope):** the split, plainly — **funding, bridging,
 swaps, and tokenized assets are live on Robinhood Chain; prediction execution is
-still mostly Polymarket today.** Robinhood Chain / **Rothera** prediction
-markets are **discovery + analysis only for now** (BankrBot has no native Rothera
-execution integration yet) — PolyRobin falls
+still mostly Polymarket today.** Robinhood Chain / **Meridian Predict** prediction
+markets are **discovery + analysis only for now** (BankrBot has no native Meridian
+Predict execution integration yet) — PolyRobin falls
 back to Polymarket for execution where an equivalent market exists, and says so.
 
 ---
@@ -102,7 +102,7 @@ touch PolyRobin · ambiguous-resolution markets are never recommended.
 |----------|-----------|-----------------|
 | Politics · Crypto · Sports · Macro · Weather | Polymarket (+ RH Chain where listed) | Polymarket (live) |
 | RWAs / tokenized assets | Robinhood Chain | Guided via BankrBot RH-Chain rails |
-| Tokenized stock events (Rothera) | Robinhood Chain | **Analysis now · Polymarket fallback** |
+| Tokenized stock events (Meridian Predict) | Robinhood Chain | **Analysis now · Polymarket fallback** |
 
 ---
 
@@ -117,10 +117,10 @@ You:  yes
 PR:   ✅ BankrBot placed $20 YES. Rationale Card saved.
 ```
 
-**Analyze a Robinhood Chain / Rothera market (analysis-only)**
+**Analyze a Robinhood Chain / Meridian Predict market (analysis-only)**
 ```
 You:  @bankrbot use PolyRobin to scan Robinhood Chain for tokenized-stock event markets
-PR:   Found 3 on Rothera (analysis-only via PolyRobin — no native BankrBot execution
+PR:   Found 3 on Meridian Predict (analysis-only via PolyRobin — no native BankrBot execution
       yet). Top: "NVDA beats Q3 EPS"
       — my est 0.63 vs 0.55, edge +8pts. No native execution yet; equivalent exists on
       Polymarket — want me to execute there instead?
