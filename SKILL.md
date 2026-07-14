@@ -325,23 +325,32 @@ the math, and a confirmation prompt before anything moves. Every example below i
 message you send to `@bankrbot`. It always explains its reasoning and asks for
 confirmation before anything that moves money.
 
-### 📏 Response format (keep it X-sized)
+### 📏 Response format (keep it X-sized — same signal, no rambling)
 
-Replies land as posts on X, so **default to a compact reply that fits one post** —
-lead with the verdict, not a wall of text. Reserve the full multi-section breakdown
-for the **`why`** command and the audit-log Rationale Card.
+Replies land as posts on X. **The default answer MUST be tight and high-signal — no
+narrative rambling.** Same quality (independent probability, the EV math, sizing,
+gate verdict), just no filler. The full breakdown lives behind **`why`**.
 
-- **Default (concise, ~1 post):**
-  ```
-  <Market> · <Venue> · YES <price> · est <p> · conviction <n>/100
-  Edge +<x>pts → net EV +<y>%  ·  size $<S> (¼-Kelly)
-  All 7 gates ✅ (gate 5 confirm ⏳)  ·  reply `yes` or `why`
-  ```
+**Hard rules for the default reply:**
+- **≈ 4 lines / under ~500 characters.** If it doesn't fit, cut prose, not numbers.
+- **One line per component.** No paragraphs, no "this event tracks…" explainers, no
+  restating the question, no market-description filler.
+- **The "why" is ONE short clause**, not a paragraph. (e.g. *"cooling CPI + steady
+  jobs → pause favored"* — not five sentences of technical-analysis narrative.)
+- Always end with the **verdict** (`Confirm?` / `stand down`) and `reply yes or why`.
+
+**Default template (this is the whole reply):**
+```
+<Market> · <Venue> · YES <price or "live—verify [URL]"> · est <p> · conv <n>/100
+edge +<x>pts → net EV +<y>% (after fees+slippage) · size $<S> (¼-Kelly)
+gates: <pass/fail summary, name any ❌> · gate 5 ⏳
+<one-clause why> → Confirm? reply `yes` or `why`
+```
+
 - **`why` → full Rationale Card:** the complete gross→net EV math, Kelly working,
-  every gate line-by-line, sources, and ambiguity assessment.
-- If a compact reply would still overflow a post, **summarize and point to `why`** —
-  never truncate mid-number or drop the confirmation line. The `Confirm?`/gate-5
-  status must always be visible.
+  every gate line-by-line, sources, and ambiguity assessment. **Only** on request.
+- If even the compact reply would overflow, **trim the why-clause first**, never the
+  numbers or the confirmation line. The verdict/gate-5 status must always be visible.
 
 ### ▶️ Demo quick-start (safe, no funds move)
 
