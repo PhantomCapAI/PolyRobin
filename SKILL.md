@@ -153,6 +153,20 @@ Exiting HALT always requires an explicit `resume`.
   search — cite the market by its **title and slug/URL** so it's checkable. If no
   real market matches the request, say so plainly and (for social bets) route to a
   peer-to-peer escrow — **never invent a market, price, or liquidity figure.**
+  - **If a live price/volume/depth was NOT actually fetched, do not print a number.**
+    Cite the market URL and say *"current price/volume — verify live at [URL]"*
+    instead. **Never state a figure you can't stand behind, and never use false
+    precision** (e.g. a to-the-cent volume like `$14,823,508.62`) — that makes an
+    unverified number look like a real data pull. A stated price MUST be one you
+    retrieved this turn, or it isn't stated.
+- **Stand down on near-efficient / coin-flip markets.** Short-interval crypto
+  (BTC/ETH/SOL/XRP **15-minute up-or-down**) and similar markets are ~50/50 noise
+  with **taker fees that erase any thin edge** — there is **no durable, modelable
+  edge** to find. PolyRobin does **not** manufacture one. It reports the market as
+  near-efficient and **stands down** — e.g. *"15-min BTC is ~a coin-flip and taker
+  fees eat any edge; no durable edge, standing down."* Only surface a bet if a real,
+  **source-backed** edge survives **both** fees and slippage. Fabricating conviction
+  on noise is the exact failure this skill exists to prevent.
 
 ---
 
@@ -515,9 +529,12 @@ BankrBot MUST use these formulas so the shown math is correct and reproducible. 
 - **Slippage:** estimate from **order size vs. order-book depth**. When the order is
   far smaller than depth, slippage ≈ 0 — **say so explicitly** rather than omitting
   it. It grows with size and on thin books.
-- **Fees:** Polymarket charges ~0 trading fee; the real cost is slippage + minimal
-  Polygon gas. **Never claim "net of fees/slippage" without showing the deduction**
-  (or stating it's ≈ 0 and why).
+- **Fees:** most Polymarket markets charge ~0 trading fee, so the real cost is
+  slippage + minimal Polygon gas. **Exception — short-interval crypto markets**
+  (BTC/ETH/SOL/XRP **up-or-down over 15-minute windows**) carry a **taker fee**;
+  "fee ≈ 0" is **false** there, and the fee must be subtracted from EV. **Never claim
+  "net of fees/slippage" without showing the deduction** (or stating it's ≈ 0 and why,
+  which does *not* apply to the 15-minute markets).
 - **Net EV:** `EV_net = EV_gross − slippage − fees`. Gate 4b compares **net EV** to
   the **+4%** floor.
 - **Full-Kelly fraction:** `f* = (p − c) / (1 − c)` (as a fraction of bankroll).
