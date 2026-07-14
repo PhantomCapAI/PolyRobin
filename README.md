@@ -291,4 +291,4 @@ recommend doing nothing.
 
 ## License
 
-MIT © PolyRobin Labs. See [LICENSE](./LICENSE).
+MIT © Phantom Capital. See [LICENSE](./LICENSE).
