@@ -36,6 +36,13 @@ volatility trim (×0.95)                        → ~$29.7
 rounded DOWN to a conservative                 → $20   (2.0% of bankroll, inside the 10% cap)
 ```
 
+### Book at check (Gate 0 — read before any gate)
+> **Book at check:** 2 open · 12% deployed · sports 0% · today 0.0% · bankroll $1,000
+
+Read from the user's public wallet address before evaluating any gate (positions
+are public on-chain — no key, no signature). The exposure figures below are computed
+against this book, not assumed. See [`references/portfolio-read.md`](../references/portfolio-read.md).
+
 ### The 7 gates
 | # | Gate | Status | Detail |
 |---|------|:------:|--------|
@@ -52,5 +59,12 @@ rounded DOWN to a conservative                 → $20   (2.0% of bankroll, insi
 > **Suggested:** Place $20 YES at ≤0.52 on Polymarket. **Confirm?** Reply `yes` and
 > BankrBot places it from your wallet, or ask `why` for the full card. **Nothing has
 > moved** — gate 5 is pending.
+
+> **Calibration:** 34 resolved · Brier 0.191 vs. market 0.207 · slight overconfidence above 0.7
+
+*This estimate (p_est 0.58) is logged immutably to `~/.polyrobin/calibration.jsonl`
+at the time it was made and scored against the market on resolution. The footer above
+shows only because ≥20 estimates have resolved; below that threshold PolyRobin reports
+the count and says the sample is too small to mean anything.*
 
 *Decision-support only, not financial advice. PolyRobin never custodies funds or keys.*

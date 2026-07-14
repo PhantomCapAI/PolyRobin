@@ -72,6 +72,21 @@
     "pct_of_bankroll": 0.02,
     "notes": "1/4-Kelly (0.031 x $1000 = ~$31), volatility-trimmed to ~$29.7, then rounded DOWN to a conservative $20 -- well inside the 10% per-market cap."
   },
+  "book_at_check": {
+    "$comment": "Gate 0 — the current book, read from the user's PUBLIC wallet address before any gate was evaluated. Reading positions is public, read-only, on-chain: no key, no signature, no auth. See references/portfolio-read.md.",
+    "read_source": "polymarket_data_api /positions (public wallet address only)",
+    "wallet_address_used": "user proxy wallet from config (public)",
+    "bankroll_usd": 1000.0,
+    "bankroll_source": "user-declared (never inferred from wallet balance)",
+    "open_positions": 2,
+    "total_deployed_pct": 0.12,
+    "candidate_category": "sports",
+    "candidate_category_exposure_pct": 0.0,
+    "candidate_market_exposure_pct": 0.0,
+    "day_realized_plus_unrealized_pct": 0.0,
+    "readable": true,
+    "summary": "2 open · 12% deployed · sports 0% · today 0.0% · bankroll $1,000"
+  },
   "gates": [
     { "id": 1, "name": "Daily loss limit", "threshold": "5% of bankroll", "status": "PASS", "detail": "Day drawdown 0.0%; no HALT." },
     { "id": 2, "name": "Max exposure per market", "threshold": "10% of bankroll", "status": "PASS", "detail": "$20 = 2.0% of bankroll." },
@@ -92,6 +107,18 @@
     "reason": "Awaiting user confirmation (gate 5). No funds have moved.",
     "confirmed_instruction": null,
     "fill": null
+  },
+  "calibration": {
+    "$comment": "This estimate is logged immutably to ~/.polyrobin/calibration.jsonl at the time it is made (before resolution), then scored against the market on resolution. The footer is surfaced only once >=20 estimates have resolved.",
+    "ledger_path": "~/.polyrobin/calibration.jsonl",
+    "logged_estimate": { "p_est": 0.58, "p_market": 0.52, "immutable": true },
+    "resolved_count": 34,
+    "brier_score": 0.191,
+    "brier_score_market": 0.207,
+    "beating_market": true,
+    "note": "34 resolved · Brier 0.191 vs. market 0.207 · slight overconfidence above 0.7",
+    "footer_shown": true,
+    "footer_threshold": 20
   },
   "disclaimer": "Decision-support only, not financial advice. Prediction markets can lose 100% of staked capital. PolyRobin never custodies funds or keys; execution runs through BankrBot from the user's own wallet on explicit confirmation."
 }

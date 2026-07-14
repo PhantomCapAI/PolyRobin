@@ -85,6 +85,25 @@ for key in ["risk", "venues", "rails", "execution"]:
         sys.exit(1)
 print("✅ examples/config.yaml parses and has expected keys")
 
+# --- Gate 0: book-read + bankroll keys must be present ----------------------
+# Gate 0 (read the book first) needs a public wallet address to read positions,
+# and every gate percentage is computed against a user-declared bankroll.
+for key in ["wallet_address", "bankroll"]:
+    if key not in cfg or cfg[key] in (None, ""):
+        print(f"❌ examples/config.yaml missing required key: {key} "
+              f"(needed for Gate 0 — read the book first)", file=sys.stderr)
+        sys.exit(1)
+bankroll = cfg.get("bankroll")
+if not isinstance(bankroll, (int, float)) or isinstance(bankroll, bool) or bankroll <= 0:
+    print(f"❌ config 'bankroll' must be a positive number (user-declared risk "
+          f"capital), got {bankroll!r}", file=sys.stderr)
+    sys.exit(1)
+if not isinstance(cfg.get("wallet_address"), str):
+    print("❌ config 'wallet_address' must be a string (public address, read-only)",
+          file=sys.stderr)
+    sys.exit(1)
+print("✅ config has wallet_address (public) and a positive user-declared bankroll")
+
 # --- Config values must sit inside the SAFE gate bands ----------------------
 # Loosening a gate beyond its safe band should require a deliberate, loud override
 # — the sample config must never ship outside these bounds.
@@ -142,6 +161,42 @@ if os.path.exists(rc_path):
     print("✅ examples/rationale-card.json is valid (7 gates, confirmation gate present)")
 else:
     print("ℹ️  examples/rationale-card.json not found — skipping sample-output check")
+
+# --- Calibration ledger: every logged estimate must carry the schema --------
+# The calibration ledger is what makes PolyRobin's probability estimates
+# falsifiable. Each line must carry the full schema, and probabilities must be
+# real probabilities (in [0,1]) — a logged estimate outside [0,1] is a bug.
+cal_path = os.path.join(os.path.dirname(config_path), "calibration.jsonl")
+if os.path.exists(cal_path):
+    required_fields = ["ts", "market_id", "p_est", "p_market",
+                       "conviction", "acted", "resolved", "outcome"]
+    count = 0
+    for lineno, raw in enumerate(open(cal_path, encoding="utf-8"), 1):
+        line = raw.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError as e:
+            print(f"❌ calibration.jsonl line {lineno} is not valid JSON: {e}", file=sys.stderr)
+            sys.exit(1)
+        missing = [k for k in required_fields if k not in rec]
+        if missing:
+            print(f"❌ calibration.jsonl line {lineno} missing fields: {missing}", file=sys.stderr)
+            sys.exit(1)
+        for k in ("p_est", "p_market"):
+            v = rec[k]
+            if not isinstance(v, (int, float)) or isinstance(v, bool) or not (0.0 <= v <= 1.0):
+                print(f"❌ calibration.jsonl line {lineno}: {k}={v!r} must be a number in [0,1]",
+                      file=sys.stderr)
+                sys.exit(1)
+        count += 1
+    if count == 0:
+        print("❌ calibration.jsonl contains no estimates", file=sys.stderr)
+        sys.exit(1)
+    print(f"✅ examples/calibration.jsonl valid ({count} estimates; full schema, p_est/p_market in [0,1])")
+else:
+    print("ℹ️  examples/calibration.jsonl not found — skipping calibration-ledger check")
 PYEOF
 
 pass "All validations passed"

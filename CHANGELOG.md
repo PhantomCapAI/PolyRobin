@@ -6,7 +6,63 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Fixed
+## [1.2.0] — 2026-07-14
+
+> **This release is a correctness fix, not a feature add.** In v1.1, gates 1, 2, 3,
+> and 6 reference portfolio state (daily drawdown, per-market exposure, per-category
+> exposure, total deployed) — but `SKILL.md` is a stateless spec that BankrBot reads
+> fresh on each invocation, so those four gates had **no numbers to check against**.
+> They could not be enforced; they were decorative. v1.2 is what makes them binding.
+
+### Added (portfolio state + calibration ledger)
+- **Gate 0 — read the book first (`SKILL.md`).** A precondition (not an eighth gate):
+  before evaluating any gate, PolyRobin reconstructs the user's current book —
+  reads open positions, cost basis, current mark, unrealized PnL per position, and
+  the day's realized PnL — then **computes** the numbers gates 1/2/3/6 check against
+  instead of assuming a clean slate. If the book cannot be read (no wallet, API
+  unreachable, ambiguous), it declines to size and reports which gates it cannot
+  evaluate — **an unverifiable gate is a red gate.** Every Rationale Card now shows a
+  **"Book at check:"** line so the arithmetic is auditable.
+- **`references/portfolio-read.md`.** Documents exactly how the book is read —
+  Polymarket's public Data API (`GET /positions`, `/activity`, `/value`) and the
+  on-chain CTF (ERC-1155) cross-check on Polygon — with doc URLs. Verified that
+  reading positions needs **only a public wallet address: no key, no signature, no
+  auth**, so Gate 0 never touches the user's keys.
+- **The calibration ledger (`SKILL.md`).** Every independent probability estimate is
+  logged immutably to `~/.polyrobin/calibration.jsonl` at the time it is made
+  (before resolution), then scored on resolution: **Brier score**, **Brier vs. the
+  market price** (the number that matters — beating 0.25 is trivial, beating the
+  market is the whole question), and a **decile calibration curve**. Reported
+  unprompted in the Rationale Card footer once ≥20 estimates resolve, and PolyRobin
+  **surfaces when it is not beating the market** over the last 30 resolutions and
+  tells the user to stop trusting it until that turns around.
+- **`examples/calibration.jsonl`.** Six sample estimates (mixed resolved/unresolved)
+  pinning the ledger schema: `ts`, `market_id`, `question`, `category`, `p_est`,
+  `p_market`, `conviction`, `acted`, `resolved`, `outcome`.
+- **Config keys `wallet_address` (public, read-only) and `bankroll` (user-declared)**
+  in `examples/config.yaml`. Bankroll is never inferred from wallet balance — idle
+  USDC is not risk capital.
+
+### Changed (enforcement, validator, rename)
+- **Validator (`scripts/validate.sh`)** now asserts the config carries
+  `wallet_address` and a positive `bankroll`, and that every `calibration.jsonl` line
+  parses and carries the full schema with `p_est`/`p_market` in `[0,1]`. All prior
+  checks still pass.
+- **Sample Rationale Cards (`examples/rationale-card.{md,json}`)** now include the
+  Gate 0 **"Book at check:"** state and the calibration footer.
+- **Renamed the Robinhood/Susquehanna prediction exchange to "Meridian Predict"**
+  throughout (`SKILL.md`, `README.md`, `examples/config.yaml`), replacing the earlier
+  working name so the public spec uses one consistent name. Its status is unchanged:
+  discovery + analysis only for now (no native BankrBot execution), Polymarket
+  fallback where an equivalent market exists.
+
+### Fixed (EV correction)
+- **Corrected a wrong EV figure in the `README.md` example flow** — the fight example
+  printed a gross-EV number that didn't match its own inputs;
+  `(0.58 − 0.52) / 0.52 = +11.5%`, so it now reads `+11.5%`, matching the worked math
+  in `SKILL.md` and the sample Rationale Card.
+
+### Fixed (from live BankrBot testing)
 - **Reply template was being echoed with unfilled placeholders** (`est p`, `conv
   n/100`, `+xpts`, `[URL]`). Replaced the `<token>` template in `SKILL.md` with a
   filled example + an explicit "never output a literal placeholder" rule so BankrBot
@@ -111,7 +167,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   today on memes") into structured terms (condition, amount, parties, resolution
   criteria, deadline, source), writes a fair and verifiable resolution statement,
   and suggests the best execution path: a real custom market (Polymarket /
-  Rothera / Hunch) where one exists, otherwise a peer-to-peer escrow via
+  Meridian Predict / Hunch) where one exists, otherwise a peer-to-peer escrow via
   BankrBot wallet tools (escrow contract, multisig, or simple conditional
   transfer). Runs the full 7 safety gates — confirmation required before any funds
   move — and tracks/auto-settles on resolution. Includes a dedicated section,
@@ -130,7 +186,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Reframed PolyRobin as a **decision co-pilot / behavior spec on top of BankrBot's
   existing rails** — explicitly not executable code and not an autonomous trader.
 - Execution scope made realistic: Polymarket betting and Robinhood Chain tokenized
-  stocks/swaps/bridging run through BankrBot; **Rothera is discovery +
+  stocks/swaps/bridging run through BankrBot; **Meridian Predict is discovery +
   analysis only** for now, with Polymarket fallback where an equivalent exists.
 - Example Commands rewritten in natural-language `@bankrbot` style.
 - Integration Hooks split into "rails BankrBot already supports" vs "PolyRobin's
@@ -138,7 +194,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Config restructured to decision parameters only (`venues` + `rails`), no keys.
 - Added `bankrbot`, `social-bets`, and `friend-bets` tags.
 - Reworked the skill around a dual-venue model with **Robinhood Chain as a
-  first-class home venue** (Rothera + tokenized event markets)
+  first-class home venue** (Meridian Predict + tokenized event markets)
   alongside Polymarket.
 - Frontmatter: single-sentence description, focused tag set, added
   `visibility: public`.
@@ -169,6 +225,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Full auditability via per-decision Rationale Cards.
 - Professional `README.md` and MIT `LICENSE`.
 
-[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PhantomCapAI/PolyRobin/releases/tag/v1.0.0

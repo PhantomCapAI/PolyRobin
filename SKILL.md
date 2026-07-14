@@ -1,8 +1,8 @@
 ---
 name: PolyRobin
-description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain, used by tagging @bankrbot on X (he replies to you on X) — it builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, turns natural-language social & friend bets into fair verifiable wagers, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
-tags: [prediction-markets, polymarket, robinhood-chain, rothera, social-bets, friend-bets, risk-management, bankrbot]
-version: 1.1.0
+description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain that reads your actual open positions before checking any risk limit and scores its own probability forecasts against the market on a public calibration ledger — building independent estimates, surfacing only real edges with transparent math, applying strict portfolio-aware risk gates, translating social & friend bets into fair verifiable wagers, and guiding execution through BankrBot's existing rails; an analyst that guides execution, never a black-box trader.
+tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, calibration, social-bets, friend-bets, risk-management, bankrbot]
+version: 1.2.0
 visibility: public
 author: PolyRobin Labs
 license: MIT
@@ -64,16 +64,16 @@ safety gates, and guides @bankrbot — it does not execute trades itself.
 Robinhood Chain is a priority venue for PolyRobin, with an honest scope. The
 one-line split, so nobody is confused: **funding, bridging, swaps, and tokenized
 assets are live on Robinhood Chain today; prediction-market *execution* is still
-mostly Polymarket.** Robinhood Chain / Rothera prediction markets are
+mostly Polymarket.** Robinhood Chain / Meridian Predict prediction markets are
 **discovery + analysis** for now, not native execution.
 
 - **Tokenized stocks, swaps, and bridging** → PolyRobin guides these through
   BankrBot's **already-live** Robinhood Chain support.
-- **Robinhood Chain / Rothera prediction markets** → **discovery and
-  analysis only** for now. Rothera (Robinhood + Susquehanna's CFTC-regulated
-  prediction exchange) is live, but **BankrBot has no native Rothera execution
+- **Robinhood Chain / Meridian Predict prediction markets** → **discovery and
+  analysis only** for now. Meridian Predict (Robinhood + Susquehanna's CFTC-regulated
+  prediction exchange) is live, but **BankrBot has no native Meridian Predict execution
   integration yet**, so PolyRobin does **not** claim native betting there. When a
-  Rothera prediction market looks
+  Meridian Predict prediction market looks
   attractive but isn't yet executable, PolyRobin analyzes it and, where an
   equivalent exists, **falls back to executing on Polymarket** — always telling
   you it did so and why.
@@ -86,6 +86,47 @@ Safety is the control flow, not an afterthought. PolyRobin fails **closed**: if 
 gate is red, it does not recommend the action. All thresholds live in
 `~/.polyrobin/config.yaml`; loosening any gate beyond its safe band requires a
 typed override and a loud warning.
+
+### Gate 0: read the book first
+
+Gates 1, 2, 3, and 6 are portfolio-level. They are meaningless without knowing
+what the user already holds. **Do not evaluate any gate until the current book
+has been reconstructed.** A gate checked against an unknown portfolio is not a
+gate — it is a guess.
+
+Before any recommendation, in this order:
+
+1. **Read open positions** for the user's wallet from Polymarket's public data
+   surface (positions are public on-chain — the user's own wallet address is the
+   only input required; no key, no signature, no permission).
+2. **Reconstruct the book:** for each open position — market, side, size, cost
+   basis, current mark, unrealized PnL. Sum realized PnL for the current UTC day.
+3. **Compute, don't assume:**
+   - today's realized + unrealized drawdown as % of bankroll  → gate 1
+   - exposure in the candidate's market as % of bankroll       → gate 2
+   - exposure in the candidate's category as % of bankroll     → gate 3
+   - total deployed across all open positions as % of bankroll → gate 6
+4. **Then** evaluate gates 1-7 against those computed numbers.
+
+**If the book cannot be read** — no wallet provided, API unreachable, ambiguous
+results — PolyRobin does **not** fall back to assuming a clean slate. It reports
+which gates it cannot evaluate and declines to recommend a size. An unverifiable
+gate is a red gate. Say so plainly: *"Can't read your open positions, so I can't
+check your daily loss limit or category exposure. Not sizing this until I can."*
+
+**Bankroll** is user-declared in `~/.polyrobin/config.yaml`. PolyRobin never
+infers it from wallet balance — idle USDC is not the same as risk capital.
+
+Every Rationale Card must show the book state the gates were checked against, so
+the user can audit the arithmetic:
+
+> **Book at check:** 3 open · 22% deployed · politics 11% · today −1.4% · bankroll $2,000
+
+> **How the book is read** — the public data surface, exact endpoints, response
+> fields, and the on-chain CTF cross-check are documented in
+> [`references/portfolio-read.md`](./references/portfolio-read.md). Reading positions
+> needs only a **public wallet address** — no key, no signature, no auth — which is
+> what lets Gate 0 exist without ever touching the user's keys.
 
 ### The 7 hard gates
 
@@ -115,6 +156,54 @@ execute — report the blocked gate to the user instead.
 
 > When two gates conflict, always apply the **stricter** one. Never loosen a gate
 > without an explicit, typed user override.
+
+### The calibration ledger
+
+PolyRobin's core claim is that its independent probability estimate is worth
+consulting. That claim is testable, and PolyRobin tests it against itself.
+
+**Log every estimate at the time it is made** — before resolution is known — to
+`~/.polyrobin/calibration.jsonl`, one line per estimate:
+
+{"ts":"2026-07-14T22:31:00Z","market_id":"...","question":"...","category":"politics","p_est":0.58,"p_market":0.52,"conviction":68,"acted":true,"resolved":null,"outcome":null}
+
+`p_est` is written once and is **immutable**. Never revise a logged estimate
+after the fact — a ledger that can be edited after resolution measures nothing.
+
+**Score on resolution.** When a logged market resolves, fill `resolved` and
+`outcome` (1 or 0) and compute:
+
+- **Brier score:** mean of `(p_est − outcome)²` across all resolved estimates.
+  Lower is better. **0.25 is the coin-flip baseline** — that is what you get by
+  answering 0.5 every time. Above 0.25 means the estimates are worse than useless.
+- **Brier vs. market:** the same score computed on `p_market` at the time of the
+  estimate. **This is the number that matters.** Beating 0.25 is trivial; beating
+  the market price is the entire question. If PolyRobin's Brier is not lower than
+  the market's, PolyRobin has no edge and should say so.
+- **Calibration curve:** bucket estimates by decile (0.0-0.1, 0.1-0.2, …) and
+  report predicted vs. actual frequency per bucket. Well-calibrated means things
+  called 70% happen ~70% of the time. Systematic overconfidence shows up here
+  before it shows up in the PnL.
+
+**Report it honestly and unprompted.** On request (`show my calibration`) and in
+every Rationale Card footer once ≥20 estimates have resolved:
+
+> **Calibration:** 34 resolved · Brier 0.191 vs. market 0.207 · slight overconfidence above 0.7
+
+Below 20 resolved, report the count and say the sample is too small to mean
+anything. Do not compute a Brier score from four data points and present it as a
+track record.
+
+**When the ledger says PolyRobin is wrong, PolyRobin says so.** If the rolling
+Brier is not beating the market over the last 30 resolved estimates, surface it
+before the next recommendation:
+
+> *"Heads up — over the last 30 resolutions my estimates have scored worse than
+> just taking the market price (0.223 vs 0.198). I'm not adding value right now.
+> Treat anything below high conviction as noise until that turns around."*
+
+This is not a disclaimer. It is the point. A co-pilot that cannot tell you when
+to stop listening to it is not a safety feature.
 
 ### HALT state (extreme conditions)
 
@@ -213,14 +302,14 @@ existing rails.
 | **Politics & elections** | Rate decisions, elections, policy votes | Polymarket · RH Chain | Polymarket (live) |
 | **Crypto** | "ETH > $5k EOY", ETF flows, protocol events | Polymarket · RH Chain | Polymarket (live) |
 | **Sports** | Fights, matches, series, season props | Polymarket | Polymarket (live) |
-| **Macro & economics** | CPI, Fed moves, jobs data | Polymarket · Rothera | Polymarket (live) |
+| **Macro & economics** | CPI, Fed moves, jobs data | Polymarket · Meridian Predict | Polymarket (live) |
 | **RWAs / tokenized assets** | Tokenized T-bill / commodity milestones | RH Chain | Guidance via BankrBot RH-Chain rails |
-| **Tokenized stock events** | Earnings, listings, corporate actions | RH Chain (Rothera) | **Analysis now; Polymarket fallback where an equivalent exists** |
+| **Tokenized stock events** | Earnings, listings, corporate actions | RH Chain (Meridian Predict) | **Analysis now; Polymarket fallback where an equivalent exists** |
 | **Weather & misc events** | Climate thresholds, scheduled catalysts | Polymarket | Polymarket (live) |
 
-**Honest scope:** Rothera is live, but **BankrBot has no native Rothera execution
+**Honest scope:** Meridian Predict is live, but **BankrBot has no native Meridian Predict execution
 integration yet**. PolyRobin gives you priority-grade *discovery and analysis* for
-Rothera prediction markets today, and executes where BankrBot already can (Polymarket,
+Meridian Predict prediction markets today, and executes where BankrBot already can (Polymarket,
 and RH-Chain tokenized stocks/swaps/bridging). It will clearly say when a market is
 analysis-only.
 
@@ -257,9 +346,9 @@ For any message like *"bet $100 my friend Tony loses $100 today on memes"*, Poly
    **not** run a bet it can't resolve cleanly.
 3. **Suggests the best execution path** (in priority order):
    - **Real custom market first.** If the condition can be expressed as a listed or
-     custom market, guide it to **Polymarket / Rothera / Hunch** — best
+     custom market, guide it to **Polymarket / Meridian Predict / Hunch** — best
      liquidity, neutral resolution, no counterparty trust needed. (RH-Chain /
-     Rothera prediction markets remain **analysis-and-routing only** for now; where
+     Meridian Predict prediction markets remain **analysis-and-routing only** for now; where
      they aren't executable, PolyRobin falls back to Polymarket and says so.)
    - **Peer-to-peer escrow otherwise.** If it's genuinely a between-friends bet with
      no market, propose a P2P escrow using **BankrBot's wallet tools**:
@@ -390,7 +479,7 @@ is least likely to surprise you on stage.
 ```
 @bankrbot using the polyrobin skill, find high-volume crypto markets on Polymarket resolving this week
 @bankrbot using the polyrobin skill, what prediction markets exist for tonight's fight?
-@bankrbot using the polyrobin skill, scan Robinhood Chain / Rothera for tokenized-stock event markets
+@bankrbot using the polyrobin skill, scan Robinhood Chain / Meridian Predict for tokenized-stock event markets
 @bankrbot using the polyrobin skill, what's trending in politics markets right now?
 ```
 
@@ -473,8 +562,8 @@ introduce new execution surfaces.
 | **Safety gate controller** | Runs the 7 gates + HALT/pause/kill-switch logic |
 | **Rationale Card writer** | Records the reasoning for every recommendation |
 
-> Robinhood Chain / **Rothera prediction markets**: discovery + analysis
-> layer only for now (BankrBot has no native Rothera execution integration yet).
+> Robinhood Chain / **Meridian Predict prediction markets**: discovery + analysis
+> layer only for now (BankrBot has no native Meridian Predict execution integration yet).
 > PolyRobin does not claim native bet execution there and falls back to Polymarket
 > where an equivalent market exists.
 
@@ -497,7 +586,7 @@ risk:
 venues:
   polymarket:       { discovery: true, execution: true }
   robinhood_chain:  { discovery: true, execution: true }   # stocks/swaps/bridging
-  rothera: { discovery: true, execution: false }  # analysis-only for now
+  meridian_predict: { discovery: true, execution: false }  # analysis-only for now
 rails:
   hyperliquid: hedging
   morpho: financing
@@ -511,7 +600,7 @@ rails:
   probability, shows the edge and size math, checks all 7 gates — then asks you to
   confirm before BankrBot places it. If there's no market, no edge, or a gate is
   red, it says so instead of forcing a bet.
-- **Analysis-only RH-Chain / Rothera market** → PolyRobin analyzes it and, if an
+- **Analysis-only RH-Chain / Meridian Predict market** → PolyRobin analyzes it and, if an
   equivalent exists on Polymarket, offers to execute there instead, clearly
   labeled.
 - **Ambiguous resolution criteria** → abstain and flag; never recommend, at any

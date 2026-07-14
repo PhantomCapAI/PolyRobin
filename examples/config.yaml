@@ -4,8 +4,22 @@
 #
 # Copy to ~/.polyrobin/config.yaml and adjust.
 
-# --- Bankroll ---------------------------------------------------------------
+# --- Bankroll & book -------------------------------------------------------
 bankroll_source: robinhood-chain   # home chain for funds
+
+# Your PUBLIC wallet address — used ONLY to read your open positions before any
+# risk gate is checked (Gate 0: read the book first). Reading positions is a
+# public, read-only on-chain query: NO private key, NO signature, NO auth. Never
+# put a private key or seed phrase in this file. Use your Polymarket proxy wallet
+# address (the one in your Polymarket profile URL) so the read sees your positions.
+# See references/portfolio-read.md for exactly how the book is read.
+wallet_address: "0x0000000000000000000000000000000000000000"   # replace with YOUR public address
+
+# Your risk capital, in USDC — DECLARED BY YOU, not inferred.
+# PolyRobin never infers bankroll from your wallet balance: idle USDC sitting in a
+# wallet is not the same as risk capital. Every gate percentage (5% daily loss,
+# 10% per market, 25% per category, 60% deployed) is computed against THIS number.
+bankroll: 2000                     # e.g. 2000 = $2,000 of risk capital
 
 # --- Risk: the 7 hard gates -------------------------------------------------
 # Fractions of bankroll unless suffixed _usd.
@@ -35,9 +49,9 @@ venues:
   robinhood_chain:
     discovery: true
     execution: true                  # tokenized stocks / swaps / bridging via BankrBot
-  rothera:
+  meridian_predict:
     discovery: true
-    execution: false                 # analysis-only (no native BankrBot Rothera execution yet)
+    execution: false                 # analysis-only (no native BankrBot Meridian Predict execution yet)
     fallback: polymarket             # execute equivalent on Polymarket where it exists
 
 # --- Execution routing & chain targeting ------------------------------------
