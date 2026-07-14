@@ -6,6 +6,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (data-integrity hardening — from live BankrBot testing)
+- **No stated price/volume/depth without a live fetch.** If a figure wasn't actually
+  retrieved this turn, PolyRobin cites the market URL and says "verify live at [URL]"
+  instead of printing a number — and **never uses false precision** (e.g. a
+  to-the-cent volume). Live testing showed BankrBot citing real market URLs but
+  confabulating the prices/volume.
+- **Corrected the fee model.** Short-interval crypto markets (BTC/ETH/SOL/XRP 15-min
+  up/down) carry a **taker fee** — "fee ≈ 0" is false there and the fee must be
+  subtracted from EV.
+- **Stand down on near-efficient / coin-flip markets.** 15-minute crypto up/down is
+  ~50/50 noise with fees that erase any edge; PolyRobin reports it as near-efficient
+  and stands down instead of manufacturing a >4% edge (observed in testing).
+
 ### Added
 - **Token section (README)** — documents the **PolyRobin ($PR)** community token on
   **Robinhood Chain** (contract `0x41f2…8ba3`, PR/WETH pair) with links to live price
