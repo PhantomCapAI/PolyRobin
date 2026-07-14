@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- **Reply template was being echoed with unfilled placeholders** (`est p`, `conv
+  n/100`, `+xpts`, `[URL]`). Replaced the `<token>` template in `SKILL.md` with a
+  filled example + an explicit "never output a literal placeholder" rule so BankrBot
+  substitutes real values.
+
 ### Changed (analysis ≠ sizing — the bet is the user's choice)
 - **Separated analysis from sizing.** A discovery/analysis request ("show me the
   markets", "what's the edge on X") now returns **analysis only** — no pre-sized bet,

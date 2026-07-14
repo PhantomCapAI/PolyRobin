@@ -338,12 +338,19 @@ come back with a pre-sized bet, a dollar amount, or a "place $X / reply yes" pro
 
 **Default = ANALYSIS ONLY** (for "show me the markets", "what's the edge on X", any
 discovery/analysis). No stake, no `$` amount, no confirm line — end by leaving the
-decision to the user:
+decision to the user. This is the **shape** — fill every field with the real value.
+A correctly-filled reply looks exactly like this:
 ```
-<Market> · <Venue> · YES <price or "live—verify [URL]"> · est <p> · conv <n>/100
-edge +<x>pts → net EV +<y>% (after fees) · gate 4: <✅/❌> · verdict: <value / stand down>
-<one-clause why> → want to size a bet? tell me your stake, or ask `why`
+France to win the World Cup · Polymarket · YES 0.39 · est 0.42 · conv 72/100
+edge +3pts → net EV +7.8% (after fees) · gate 4: ✅ · verdict: value
+strong squad depth + form favor France → want to size a bet? tell me your stake, or ask `why`
 ```
+> ⚠️ **Never output a literal placeholder.** Every field must be a real
+> fetched/computed value. If a price wasn't fetched, print the **actual market URL**
+> + "verify live" (not the text "[URL]"). Never emit bare tokens like `p`, `n`, `x`,
+> `y`, `<price>`, `[URL]`, or `$<S>` — printing a placeholder means you failed to fill
+> the field, and that reply is wrong.
+
 Hard rules: ≈4 lines / under ~500 chars; one line per component; the "why" is ONE
 clause, not a paragraph; name any failed gate.
 
