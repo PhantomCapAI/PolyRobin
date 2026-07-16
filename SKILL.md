@@ -1,7 +1,7 @@
 ---
 name: PolyRobin
 description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain, used by tagging @bankrbot on X (he replies to you on X) — it builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, turns natural-language social & friend bets into fair verifiable wagers, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
-tags: [prediction-markets, polymarket, robinhood-chain, rothera, social-bets, friend-bets, risk-management, bankrbot]
+tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, social-bets, friend-bets, risk-management, bankrbot]
 version: 1.1.0
 visibility: public
 author: PolyRobin Labs
@@ -64,16 +64,16 @@ safety gates, and guides @bankrbot — it does not execute trades itself.
 Robinhood Chain is a priority venue for PolyRobin, with an honest scope. The
 one-line split, so nobody is confused: **funding, bridging, swaps, and tokenized
 assets are live on Robinhood Chain today; prediction-market *execution* is still
-mostly Polymarket.** Robinhood Chain / Rothera prediction markets are
+mostly Polymarket.** Robinhood Chain / Meridian Predict prediction markets are
 **discovery + analysis** for now, not native execution.
 
 - **Tokenized stocks, swaps, and bridging** → PolyRobin guides these through
   BankrBot's **already-live** Robinhood Chain support.
-- **Robinhood Chain / Rothera prediction markets** → **discovery and
-  analysis only** for now. Rothera (Robinhood + Susquehanna's CFTC-regulated
-  prediction exchange) is live, but **BankrBot has no native Rothera execution
+- **Robinhood Chain / Meridian Predict prediction markets** → **discovery and
+  analysis only** for now. Meridian Predict (Robinhood + Susquehanna's CFTC-regulated
+  prediction exchange) is live, but **BankrBot has no native Meridian Predict execution
   integration yet**, so PolyRobin does **not** claim native betting there. When a
-  Rothera prediction market looks
+  Meridian Predict prediction market looks
   attractive but isn't yet executable, PolyRobin analyzes it and, where an
   equivalent exists, **falls back to executing on Polymarket** — always telling
   you it did so and why.
@@ -218,22 +218,28 @@ PolyRobin guides, except prediction-market bets (which use Polymarket on Polygon
 
 ## Supported Markets
 
-PolyRobin discovers and analyzes across both venues; execution uses BankrBot's
-existing rails.
+**Coverage is universal: whatever market the user asks about, BankrBot searches
+Polymarket and reports it.** Polymarket's search returns everything it lists, so
+PolyRobin is **not** restricted to a fixed set of categories. The table below
+**illustrates** common categories and how each routes for discovery/execution — it is
+**a set of examples, not an exhaustive allow-list.** A market that fits none of these
+rows is still in scope: **if Polymarket lists it, PolyRobin covers it.** (Execution
+still uses BankrBot's existing rails.)
 
-| Category | Examples | Discovery | Execution today |
+| Example category | Examples | Discovery | Execution today |
 |----------|----------|-----------|-----------------|
 | **Politics & elections** | Rate decisions, elections, policy votes | Polymarket · RH Chain | Polymarket (live) |
 | **Crypto** | "ETH > $5k EOY", ETF flows, protocol events | Polymarket · RH Chain | Polymarket (live) |
 | **Sports** | Fights, matches, series, season props | Polymarket | Polymarket (live) |
-| **Macro & economics** | CPI, Fed moves, jobs data | Polymarket · Rothera | Polymarket (live) |
+| **Macro & economics** | CPI, Fed moves, jobs data | Polymarket · Meridian Predict | Polymarket (live) |
 | **RWAs / tokenized assets** | Tokenized T-bill / commodity milestones | RH Chain | Guidance via BankrBot RH-Chain rails |
-| **Tokenized stock events** | Earnings, listings, corporate actions | RH Chain (Rothera) | **Analysis now; Polymarket fallback where an equivalent exists** |
+| **Tokenized stock events** | Earnings, listings, corporate actions | RH Chain (Meridian Predict) | **Analysis now; Polymarket fallback where an equivalent exists** |
 | **Weather & misc events** | Climate thresholds, scheduled catalysts | Polymarket | Polymarket (live) |
+| **Anything else Polymarket lists** | Novel / one-off events, brand-new categories | Polymarket search | Polymarket (live) where listed |
 
-**Honest scope:** Rothera is live, but **BankrBot has no native Rothera execution
+**Honest scope:** Meridian Predict is live, but **BankrBot has no native Meridian Predict execution
 integration yet**. PolyRobin gives you priority-grade *discovery and analysis* for
-Rothera prediction markets today, and executes where BankrBot already can (Polymarket,
+Meridian Predict prediction markets today, and executes where BankrBot already can (Polymarket,
 and RH-Chain tokenized stocks/swaps/bridging). It will clearly say when a market is
 analysis-only.
 
@@ -270,9 +276,9 @@ For any message like *"bet $100 my friend Tony loses $100 today on memes"*, Poly
    **not** run a bet it can't resolve cleanly.
 3. **Suggests the best execution path** (in priority order):
    - **Real custom market first.** If the condition can be expressed as a listed or
-     custom market, guide it to **Polymarket / Rothera / Hunch** — best
+     custom market, guide it to **Polymarket / Meridian Predict / Hunch** — best
      liquidity, neutral resolution, no counterparty trust needed. (RH-Chain /
-     Rothera prediction markets remain **analysis-and-routing only** for now; where
+     Meridian Predict prediction markets remain **analysis-and-routing only** for now; where
      they aren't executable, PolyRobin falls back to Polymarket and says so.)
    - **Peer-to-peer escrow otherwise.** If it's genuinely a between-friends bet with
      no market, propose a P2P escrow using **BankrBot's wallet tools**:
@@ -426,9 +432,16 @@ is least likely to surprise you on stage.
 ```
 @bankrbot using the polyrobin skill, find high-volume crypto markets on Polymarket resolving this week
 @bankrbot using the polyrobin skill, what prediction markets exist for tonight's fight?
-@bankrbot using the polyrobin skill, scan Robinhood Chain / Rothera for tokenized-stock event markets
+@bankrbot using the polyrobin skill, scan Robinhood Chain / Meridian Predict for tokenized-stock event markets
 @bankrbot using the polyrobin skill, what's trending in politics markets right now?
+@bankrbot using the polyrobin skill, is there a Polymarket market on "<any event or topic>"? find it and show it
+@bankrbot using the polyrobin skill, search Polymarket for anything on "<topic>" — any category, surface what exists
 ```
+
+> Discovery is **not** scoped to the categories above — they're just examples. Ask about
+> **any** market by name or topic and BankrBot searches Polymarket for it; if it's listed,
+> PolyRobin reports it. Every market it surfaces shows **both fetched YES and NO quotes and
+> the spread**, never a lone `price (yes)`.
 
 ### 🧠 Analysis
 
@@ -509,8 +522,8 @@ introduce new execution surfaces.
 | **Safety gate controller** | Runs the 7 gates + HALT/pause/kill-switch logic |
 | **Rationale Card writer** | Records the reasoning for every recommendation |
 
-> Robinhood Chain / **Rothera prediction markets**: discovery + analysis
-> layer only for now (BankrBot has no native Rothera execution integration yet).
+> Robinhood Chain / **Meridian Predict prediction markets**: discovery + analysis
+> layer only for now (BankrBot has no native Meridian Predict execution integration yet).
 > PolyRobin does not claim native bet execution there and falls back to Polymarket
 > where an equivalent market exists.
 
@@ -533,7 +546,7 @@ risk:
 venues:
   polymarket:       { discovery: true, execution: true }
   robinhood_chain:  { discovery: true, execution: true }   # stocks/swaps/bridging
-  rothera: { discovery: true, execution: false }  # analysis-only for now
+  meridian_predict: { discovery: true, execution: false }  # analysis-only for now
 rails:
   hyperliquid: hedging
   morpho: financing
@@ -547,7 +560,7 @@ rails:
   probability, shows the edge and size math, checks all 7 gates — then asks you to
   confirm before BankrBot places it. If there's no market, no edge, or a gate is
   red, it says so instead of forcing a bet.
-- **Analysis-only RH-Chain / Rothera market** → PolyRobin analyzes it and, if an
+- **Analysis-only RH-Chain / Meridian Predict market** → PolyRobin analyzes it and, if an
   equivalent exists on Polymarket, offers to execute there instead, clearly
   labeled.
 - **Ambiguous resolution criteria** → abstain and flag; never recommend, at any
