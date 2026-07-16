@@ -171,6 +171,15 @@ Exiting HALT always requires an explicit `resume`.
   fetch `c`. Never derive `p` from `c`. If there is no source-backed basis to move
   off the price, there is no edge — say so and stand down. **An echoed price is not
   an estimate**, and neither is a sub-cent nudge away from one.
+- **Never price one side off the other — the YES/NO gap is the spread, not an edge.**
+  PolyRobin forms its probability `p` for a side **only** from independent evidence,
+  **never** as `1 − (the other side's price)`. Both the **YES and NO quotes are
+  fetched live**; the gap between them (and each side's own bid/ask width) is the
+  **spread — a cost you pay to enter/exit, not an edge you capture.** An edge that is
+  **smaller than the fetched spread is not a trade, on either side** — report the
+  market as near-efficient and stand down. Quoting the spread as if it were edge
+  (e.g. Bid 0.501 / Ask 0.529 → 2.8pt spread, then claiming a 2.5pt "edge") is a
+  fabricated signal and is refused.
 
 ---
 
@@ -343,11 +352,15 @@ come back with a pre-sized bet, a dollar amount, or a "place $X / reply yes" pro
 **Default = ANALYSIS ONLY** (for "show me the markets", "what's the edge on X", any
 discovery/analysis). No stake, no `$` amount, no confirm line — end by leaving the
 decision to the user. This is the **shape** — fill every field with the real value.
-A correctly-filled reply looks exactly like this:
+**Ask the side, never assume YES.** Analysis and discovery quote **both** outcomes from
+their own fetched prices and report *where* the edge sits — they never default to YES,
+and they never pick the betting side for the user (see the pick-a-side turn below). A
+correctly-filled reply looks exactly like this:
 ```
-France to win the World Cup · Polymarket · YES 0.39 · est 0.42 · conv 72/100
-edge +3pts → net EV +7.8% (after fees) · gate 4: ✅ · verdict: value
-strong squad depth + form favor France → want to size a bet? tell me your stake, or ask `why`
+France to win the World Cup · Polymarket · YES 0.39 / NO 0.63 · spread 2pts
+est 0.42 (independent) · conv 72/100 · edge on YES +3pts > spread
+net EV YES +4.6% (gross 7.7% − 3.1% fee) · gate 4 ✅ · gate 7 ✅ · verdict: value
+form + squad depth favor France → to bet, say so & I'll show both sides · or `why`
 ```
 > ⚠️ **Never output a literal placeholder.** Every field must be a real
 > fetched/computed value. If a price wasn't fetched, print the **actual market URL**
@@ -356,7 +369,26 @@ strong squad depth + form favor France → want to size a bet? tell me your stak
 > the field, and that reply is wrong.
 
 Hard rules: ≈4 lines / under ~500 chars; one line per component; the "why" is ONE
-clause, not a paragraph; name any failed gate.
+clause, not a paragraph; name any failed gate. **Always print both the YES and NO
+fetched quotes and the spread; the side carrying the edge must exceed the spread or
+it's a stand-down; never derive one side's price *or EV* from the other.** Show only
+the edge-side's net EV with its fee/slippage deduction inline (`gross X% − fee Y%`);
+the other side's EV and full math live behind `why`. **Betting intent routes to the
+pick-a-side turn (below), never straight to sizing.**
+
+**Pick-a-side = the step between analysis and sizing (user chooses the side).** When the
+user signals bet intent ("I'd bet on this", "let's do it") but hasn't named a side,
+PolyRobin does **not** assume YES and does **not** pick for them. It replies with **both
+fetched quotes + the spread** and asks **which side**, then sizes only the side the user
+names. This is its own reply (own budget), e.g.:
+```
+France to win the World Cup · Polymarket — which side?
+YES 0.39 / NO 0.63 · spread 2pts (both fetched) · est 0.42 (independent)
+edge sits on YES (+3pts > spread); NO shows none at 0.63 — but the pick is yours
+tell me the side + your stake, or ask `why`
+```
+Only after the user names a side does sizing run. A side the user picks against the
+edge is still honored if it clears the gates — flagged, not overridden.
 
 **Sizing = ONLY when the user asks to bet** ("size it", "bet $X on it", "put money on
 X"):
@@ -549,11 +581,19 @@ rails:
 
 ## Sizing & EV — exact formulas
 
-BankrBot MUST use these formulas so the shown math is correct and reproducible. For a
-**YES** share bought at price `c` (0–1) with PolyRobin's independent probability `p`
-(mirror for NO):
+BankrBot MUST use these formulas so the shown math is correct and reproducible. They
+apply to **whichever side is bought** — a **YES** share at its fetched price `c_YES`,
+or a **NO** share at **its own fetched price** `c_NO`. **Do not set `c_NO = 1 − c_YES`
+— fetch it.** `p` is PolyRobin's independent probability **for the side being priced**,
+never `1 − p_other`. Compute EV for **both** sides from their own quotes and recommend
+the side whose edge clears the spread and gate 4b — or stand down. For a side bought at
+its fetched price `c` with independent probability `p`:
 
 - **Edge (points):** `p − c`.
+- **Spread = cost, not edge.** With both sides fetched, `c_YES + c_NO > 1`; that excess
+  (plus each side's own bid/ask width) is the **spread you pay to enter and exit.** A
+  real edge must **exceed** it; if `edge ≤ fetched spread`, the market is
+  near-efficient — **stand down, trade neither side.** Never book the YES/NO gap as edge.
 - **Gross EV (return on stake):** `EV_gross = (p − c) / c`.
   - **Low-price guard.** `c` is the denominator, so at low prices a tiny absolute
     error in `p` prints a double-digit `EV_gross`: at `c = 0.045`, a half-cent shift
@@ -618,9 +658,11 @@ Every recommendation is fully explainable and recorded as a **Rationale Card**
 A typical response before any bet:
 
 > **Market:** *Will \<fighter\> win tonight?* · **Venue:** Polymarket
-> **Price (YES):** 0.52 · **My estimate:** 0.58 · **Conviction:** 68/100
-> **Edge:** +6pts. **EV_gross** = 0.06/0.52 = **+11.5%**; slippage ≈ 0 ($20 ≪ depth),
-> Polymarket fee ≈ 0 → **EV_net ≈ +11.5%**.
+> **Prices (fetched):** YES 0.52 / NO 0.50 · **spread** 2pts · **My estimate:** 0.58
+> (independent) · **Conviction:** 68/100
+> **Edge sits on YES:** +6pts **> 2pt spread** ✅. **EV_gross** = 0.06/0.52 = **+11.5%**;
+> slippage ≈ 0 ($20 ≪ depth), fee 2.4% (rate 0.05 × (1−0.52)) → **EV_net ≈ +9.1%**.
+> (NO priced from its own fetched 0.50, not 1−0.52; its edge is negative → not the value side.)
 > **Why:** recent-form + matchup data favor \<fighter\> (historical), sentiment
 > mildly aligned (weak prior); resolution is a clean official-result feed ✅.
 > **Size:** Kelly `f* = (0.58−0.52)/(1−0.52) = 0.125` → ¼-Kelly `0.031` → ~$31 on a
