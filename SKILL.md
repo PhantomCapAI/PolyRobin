@@ -167,6 +167,10 @@ Exiting HALT always requires an explicit `resume`.
   fees eat any edge; no durable edge, standing down."* Only surface a bet if a real,
   **source-backed** edge survives **both** fees and slippage. Fabricating conviction
   on noise is the exact failure this skill exists to prevent.
+- **Estimate before price, or no estimate.** Form `p` from sources **first**, then
+  fetch `c`. Never derive `p` from `c`. If there is no source-backed basis to move
+  off the price, there is no edge — say so and stand down. **An echoed price is not
+  an estimate**, and neither is a sub-cent nudge away from one.
 
 ---
 
@@ -551,17 +555,23 @@ BankrBot MUST use these formulas so the shown math is correct and reproducible. 
 
 - **Edge (points):** `p − c`.
 - **Gross EV (return on stake):** `EV_gross = (p − c) / c`.
+  - **Low-price guard.** `c` is the denominator, so at low prices a tiny absolute
+    error in `p` prints a double-digit `EV_gross`: at `c = 0.045`, a half-cent shift
+    is **+11%**. Below `c = 0.10`, `p` must be sourced to the half-cent or the market
+    is a **stand-down** — regardless of what the EV figure says.
 - **Slippage:** estimate from **order size vs. order-book depth**. When the order is
   far smaller than depth, slippage ≈ 0 — **say so explicitly** rather than omitting
   it. It grows with size and on thin books.
-- **Fees:** most Polymarket markets charge ~0 trading fee, so the real cost is
-  slippage + minimal Polygon gas. **Exception — short-interval crypto markets**
-  (BTC/ETH/SOL/XRP **up-or-down over 15-minute windows**) carry a **taker fee**;
-  "fee ≈ 0" is **false** there, and the fee must be subtracted from EV. **Never claim
-  "net of fees/slippage" without showing the deduction** (or stating it's ≈ 0 and why,
-  which does *not* apply to the 15-minute markets).
-- **Net EV:** `EV_net = EV_gross − slippage − fees`. Gate 4b compares **net EV** to
-  the **+4%** floor.
+- **Fees:** read the **live** rate from the market's `feeSchedule` — **never assume
+  it.** A market is fee-free only when it carries `feesEnabled: false`; a `rate` of
+  zero is a different and rarer thing. Where fees apply, taker cost is
+  `fee = rate × c × (1 − c)` per share — as a fraction of stake that is
+  **`rate × (1 − c)`**, maximal at low prices. Write "fee ≈ 0" **only** when the
+  fetched rate is genuinely 0, and say you fetched it.
+- **Net EV:** `EV_net = EV_gross − slippage − fees`, using the **fetched** rate. Gate
+  4b compares **net EV** to the **+4%** floor. **Never print "net" without the
+  deduction visible.** A net figure equal to gross is valid only when the fetched
+  rate is 0 and you said so — otherwise you skipped it and the reply is wrong.
 - **Full-Kelly fraction:** `f* = (p − c) / (1 − c)` (as a fraction of bankroll).
 - **Recommended size:** `f* × kelly_fraction × volatility_adjustment × bankroll`, then
   **capped by every exposure gate** (per-market, per-category, deployed cap). Round
@@ -599,7 +609,7 @@ Every recommendation is fully explainable and recorded as a **Rationale Card**
 - Every input, **source-tagged, weighted, timestamped** — news sentiment, onchain
   signals, historical resolution data.
 - **Full edge math:** `EV_gross = (p − c)/c`, then `EV_net = gross − slippage − fees`
-  (slippage from order size vs. depth; Polymarket fee ≈ 0) — see *Sizing & EV*.
+  (slippage from order size vs. depth; fee from the fetched rate) — see *Sizing & EV*.
 - **Full size math:** Kelly `f* = (p − c)/(1 − c)`, × fractional-Kelly (¼ default) ×
   volatility adjustment, capped by exposure gates, rounded down — step by step.
 - Each of the **7 gates** and its result, plus any HALT/pause state.
