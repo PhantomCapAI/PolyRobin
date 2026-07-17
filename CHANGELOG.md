@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.2.1] — 2026-07-17
+
 ### Changed
 - **Social bets are held-stakes, not escrow/multisig — corrected to match BankrBot's
   real rails.** The spec claimed PolyRobin could route a no-market friend bet into a
@@ -197,7 +201,8 @@ three and writes the rules into `SKILL.md` so it cannot drift back.
 - Full auditability via per-decision Rationale Cards.
 - Professional `README.md` and MIT `LICENSE`.
 
-[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PhantomCapAI/PolyRobin/releases/tag/v1.0.0

@@ -11,7 +11,7 @@ Chain tokenized stocks / swaps / bridging, Hyperliquid perps, and Morpho. Every
 trade requires your explicit confirmation.
 
 [![Skill](https://img.shields.io/badge/BankrBot-Skill-6C5CE7)](./SKILL.md)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue)](./SKILL.md)
+[![Version](https://img.shields.io/badge/version-1.2.1-blue)](./SKILL.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![Safety](https://img.shields.io/badge/mode-safety--first-critical)](#-safety-cheat-sheet)
 
