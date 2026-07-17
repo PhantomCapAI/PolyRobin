@@ -6,102 +6,110 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Fixed
-- **Reply template was being echoed with unfilled placeholders** (`est p`, `conv
-  n/100`, `+xpts`, `[URL]`). Replaced the `<token>` template in `SKILL.md` with a
-  filled example + an explicit "never output a literal placeholder" rule so BankrBot
-  substitutes real values.
+_Nothing yet._
 
-### Changed (analysis ≠ sizing — the bet is the user's choice)
-- **Separated analysis from sizing.** A discovery/analysis request ("show me the
-  markets", "what's the edge on X") now returns **analysis only** — no pre-sized bet,
-  no dollar amount, no "place $X / reply yes." PolyRobin **sizes only when the user
-  explicitly asks to bet**; whether to bet and how much is the user's personal choice.
-- **No invented bankroll / dollar amounts.** A `$` size is only valid off the user's
-  actual known bankroll; otherwise size is shown as a **% of bankroll** and the user
-  is asked for their stake. Fixes observed behavior where "show me the markets"
-  returned "Confirm? place $18" using a bankroll it didn't actually have (the implied
-  bankroll differed market-to-market).
+## [1.2.0] — 2026-07-17
 
-### Changed (concise replies — from live BankrBot testing)
-- **Tightened the default reply to be short and high-signal** — hard rules in
-  `SKILL.md`: ≈4 lines / under ~500 chars, one line per component, the "why" is a
-  single clause (no technical-analysis narrative or "this event tracks…" filler),
-  full Rationale Card only on `why`. Same quality, no rambling. Fixes the multi-
-  paragraph walls observed on X.
-
-### Changed (data-integrity hardening — from live BankrBot testing)
-- **No stated price/volume/depth without a live fetch.** If a figure wasn't actually
-  retrieved this turn, PolyRobin cites the market URL and says "verify live at [URL]"
-  instead of printing a number — and **never uses false precision** (e.g. a
-  to-the-cent volume). Live testing showed BankrBot citing real market URLs but
-  confabulating the prices/volume.
-- **Corrected the fee model.** Short-interval crypto markets (BTC/ETH/SOL/XRP 15-min
-  up/down) carry a **taker fee** — "fee ≈ 0" is false there and the fee must be
-  subtracted from EV.
-- **Stand down on near-efficient / coin-flip markets.** 15-minute crypto up/down is
-  ~50/50 noise with fees that erase any edge; PolyRobin reports it as near-efficient
-  and stands down instead of manufacturing a >4% edge (observed in testing).
+**Data Integrity.** Live testing on `@bankrbot` caught v1.1.0 echoing the market
+price back as its "estimate," labeling figures "net" without ever subtracting the
+fee, and manufacturing conviction on coin-flip markets. This release fixes all
+three and writes the rules into `SKILL.md` so it cannot drift back.
 
 ### Added
-- **Token section (README)** — documents the **PolyRobin ($PR)** community token on
-  **Robinhood Chain** (contract `0x41f2…8ba3`, PR/WETH pair) with links to live price
-  (GeckoTerminal) and Bankr. Durable fields only — no hardcoded price/mcap. Clarifies
-  the token is separate from the skill's logic. Reworded the "not a new contract"
-  bullets in `README.md` and `SKILL.md` so they no longer read as contradictory.
-- **`Sizing & EV — exact formulas` section in `SKILL.md`** — pins down the math so
-  BankrBot computes it correctly and reproducibly: `EV_gross = (p − c)/c`,
-  `EV_net = gross − slippage − fees` (slippage from order size vs. depth; Polymarket
-  fee ≈ 0), and Kelly `f* = (p − c)/(1 − c)` × fractional-Kelly × vol-adj, capped by
-  gates and rounded down. Includes a worked check. Fixes an observed live error where
-  BankrBot reported a wildly overstated "full Kelly" (~0.56 vs. the correct ~0.20).
-
-### Added
-- **X-sized response format** — `SKILL.md` now instructs a **compact default reply**
-  that fits one X post (verdict + one-line EV/size + one-line gate summary + `yes`/
-  `why`), with the full multi-section Rationale Card reserved for the `why` command.
-  Prevents truncated/spammy replies on X while keeping full transparency on demand.
-
-### Changed
-- **Data-integrity non-negotiable** — PolyRobin must never quote a price, depth, or
-  volume it didn't actually retrieve; it must cite the real market by title + slug/
-  URL, and if no real market matches, say so and route social bets to escrow rather
-  than inventing a market or its numbers.
-- **Flag requested sizes above ¼-Kelly** — `SKILL.md` now instructs that if a user
-  names a size larger than the volatility-adjusted ¼-Kelly recommendation, it's
-  honored only if it still clears every gate and is **explicitly flagged** (e.g.
-  "note: $20 exceeds ¼-Kelly ($14.50)"), never silently allowed.
-- **Corrected the sample Rationale Card math** (`examples/rationale-card.{json,md}`):
-  gross→net EV now reconciles (slippage shown, ≈0 when order ≪ depth), Kelly uses the
-  explicit formula, and gate 5 (confirmation) reads PENDING until `yes`.
-
-### Added (earlier)
-- **Sample Rationale Card** — `examples/rationale-card.json` (machine-readable) and
-  `examples/rationale-card.md` (human-readable) show a full worked recommendation:
-  independent probability, source-tagged inputs, edge/EV math, Kelly size math, all 7
-  gate results, and state — so users can see PolyRobin's output before installing.
+- **Exact formulas pinned in `SKILL.md`** — edge (`p − c`), gross EV
+  (`EV_gross = (p − c)/c`), slippage from order size vs. book depth, fees, net EV
+  (`EV_net = gross − slippage − fees`), full Kelly `f* = (p − c)/(1 − c)`, and
+  fractional-Kelly sizing capped by every gate and rounded down — with a worked
+  check that makes the math reproducible.
+- **Low-price EV guard** — because `c` is the denominator of `EV_gross`, a
+  half-cent error in `p` at `c = 0.045` prints as +11%. Below 10¢, `p` must be
+  sourced to the half-cent or the market is a stand-down, whatever the EV figure
+  claims.
+- **Sample Rationale Cards** — `examples/rationale-card.json` (machine-readable)
+  and `examples/rationale-card.md` (human-readable) show a full worked
+  recommendation: independent probability, source-tagged inputs, edge/EV math,
+  Kelly size math, all 7 gate results, and state.
+- **README: "How funds flow through Polymarket"** — a plain-language walkthrough of
+  the money path for a prediction-market bet (funded in USDC on Polygon, executed
+  by BankrBot from the user's own wallet on confirmation, resolved via the UMA
+  oracle, redeemed 1-for-$1), using a bucketed "How many times will Elon tweet this
+  week?" market as the worked example. Reinforces that PolyRobin never custodies
+  funds.
+- **README `$PR` token section** — documents the PolyRobin community token on
+  Robinhood Chain (durable fields only, no hardcoded price/mcap) and states plainly
+  that the token is **separate from the skill** and plays no part in its analysis
+  or gates.
+- **Explicit X interaction model** — `SKILL.md` and `README.md` document that
+  BankrBot lives on X: you tag `@bankrbot`, and he replies to you on X.
 - **`▶️ Demo quick-start`** block in `SKILL.md` — a safe, four-message sequence that
   ends in analysis or a `Confirm?` prompt (no funds move), for live demos.
 
 ### Changed
-- **Validator now checks safety, not just syntax** — `scripts/validate.sh` verifies
-  every `risk.*` value sits inside its safe gate band and that gate 5 (confirmation)
-  is `true`, and validates the sample Rationale Card (7 gates, confirmation present).
-- **Tightened Robinhood-Chain wording** in `SKILL.md` and `README.md` to state the
-  funding-vs-execution split plainly (funding/bridging/swaps/tokenized assets live on
-  RH Chain; prediction execution still mostly Polymarket), removing the "first-class"
-  ambiguity flagged in review.
+- **Estimate before price, or no estimate.** Form the probability `p` from sources
+  first; only then fetch the market price `c`. Never derive `p` from `c`. An echoed
+  price is not an estimate, and neither is a sub-cent nudge away from one — if there
+  is no source-backed reason to move off the price, there is no edge: say so and
+  stand down.
+- **The spread is a cost, not an edge.** Both YES and NO are fetched from their own
+  live quotes, never as `1 − the other side`. The gap between them is what you pay
+  to enter and exit; an edge smaller than the fetched spread is not a trade on
+  either side. Quoting a 2.8¢ spread and calling it a 2.5¢ edge is refused.
+- **Fees are read, not assumed.** The taker rate comes from the market's live
+  `feeSchedule`. A market is fee-free only when it carries `feesEnabled: false`; a
+  zero `rate` is a different and rarer thing. Taker cost is `rate × c × (1 − c)` per
+  share, or `rate × (1 − c)` as a fraction of stake — largest at low prices. "Net"
+  never prints without the deduction visible.
+- **Stand down on coin-flips.** Fifteen-minute BTC/ETH/SOL up-or-down markets are
+  ~50/50 noise and taker fees eat any thin edge; PolyRobin reports them as
+  near-efficient and stands down instead of manufacturing a >4% edge.
+- **Never quote unfetched data.** Every price, depth, and volume figure must come
+  from a real market pulled that turn and cited by title and slug/URL — no number
+  that wasn't fetched, and no false precision (e.g. a to-the-cent volume like
+  `$14,823,508.62`).
+- **Never invent a bankroll.** A dollar size is valid only against the user's
+  actual, known balance; otherwise size is expressed as a percentage of bankroll
+  and the user is asked for the stake. Two markets in one session must imply the
+  same bankroll.
+- **A gate you could not run has not passed.** Without the user's bankroll and open
+  positions, the exposure limits (gates 1/2/3/6) are unverified — the reply now says
+  "can't check your limits — tell me your bankroll," never "all clear."
+- **Analysis and sizing are separate.** Discovery/analysis is the default and returns
+  both sides quoted with a read on where the value sits — no stake, no dollar amount,
+  no "reply yes to place." Picking a side is its own turn: bet intent without a named
+  side returns both fetched quotes and the spread, then a question; YES is never
+  assumed. Sizing runs only on the side the user names; a side chosen against the edge
+  is honored if it clears the gates (flagged, not overridden). Sizes above ¼-Kelly are
+  honored when every gate still clears, and are always flagged — never allowed silently.
+- **Plain-English replies.** Cents, not decimals (`39¢`, not `0.58`); the spread reads
+  as "2¢ to trade," liquidity as "deep enough to exit ✅." No jargon on X (no est / conv
+  / EV / gross / net / pts / gate-N / Kelly). The fee appears in the same breath as the
+  value ("3¢ of value, ~1¢ fee, ~2¢ left"), never "after fees." Roughly four lines, under
+  500 characters; the full gross→net math, the Kelly working, and every gate line by line
+  live behind `why`. A reply containing a bare `p`, `<price>`, `[URL]`, or `$<S>` means a
+  field was never filled and the reply is wrong.
+- **Universal coverage.** The category table is a set of examples, not an allow-list:
+  if Polymarket lists it, PolyRobin covers it.
+- **Meridian Predict confirmed** as the real venue name (Robinhood + Susquehanna); the
+  earlier fictional rename and the geo-restriction caveats were removed.
+- **Validator now checks safety invariants, not just YAML** — `scripts/validate.sh`
+  verifies every `risk.*` value sits inside its safe gate band, that gate 5
+  (confirmation) is `true`, and that the sample Rationale Card documents all 7 gates
+  with the confirmation gate present.
+- **Corrected the sample Rationale Card math** (`examples/rationale-card.{json,md}`):
+  gross→net EV reconciles (slippage shown, ≈0 when order ≪ depth), the fee is read from
+  the market's `feeSchedule` rather than assumed, Kelly uses the explicit formula, and
+  gate 5 (confirmation) reads PENDING until `yes`.
 
-### Added (prior)
-- **"How you use it" (README) + X interaction model made explicit** — documents that
-  BankrBot lives on **X**, so PolyRobin is used by tagging `@bankrbot` in a post or
-  reply and he responds on X. Reflected in the `SKILL.md` frontmatter description and
-  the Example Commands intro as well.
-- **README: "How funds flow through Polymarket"** — a plain-language walkthrough of
-  the money path for a prediction-market bet (funded in USDC on Polygon, executed by
-  BankrBot from the user's own wallet on confirmation, resolved via the UMA oracle,
-  redeemed 1-for-$1), using a "How many times will Elon tweet this week?" bucketed
-  market as the worked example. Reinforces that PolyRobin never custodies funds.
+### Fixed
+- **Reply template was being echoed with unfilled placeholders** (`est p`, `conv
+  n/100`, `+xpts`, `[URL]`). Replaced the `<token>` template in `SKILL.md` with a
+  filled example plus an explicit "never output a literal placeholder" rule.
+- **CI** — repointed the CHANGELOG footer links at resolvable URLs and synced the
+  README version badge with the `SKILL.md` frontmatter version.
+
+### Removed
+- **Polymarket referral link** from the README.
+- **Geo-restriction caveats** on the Robinhood-Chain stock-token rails.
 
 ## [1.1.0] — 2026-07-13
 
@@ -169,6 +177,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Full auditability via per-decision Rationale Cards.
 - Professional `README.md` and MIT `LICENSE`.
 
-[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/dfda97a...HEAD
+[1.2.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...dfda97a
 [1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PhantomCapAI/PolyRobin/releases/tag/v1.0.0
