@@ -177,7 +177,7 @@ three and writes the rules into `SKILL.md` so it cannot drift back.
 - Full auditability via per-decision Rationale Cards.
 - Professional `README.md` and MIT `LICENSE`.
 
-[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/dfda97a...HEAD
-[1.2.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...dfda97a
+[Unreleased]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/PhantomCapAI/PolyRobin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PhantomCapAI/PolyRobin/releases/tag/v1.0.0
