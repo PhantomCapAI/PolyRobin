@@ -6,7 +6,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- **Social bets are held-stakes, not escrow/multisig — corrected to match BankrBot's
+  real rails.** The spec claimed PolyRobin could route a no-market friend bet into a
+  peer-to-peer **escrow contract** or a **2-of-3 multisig**, and into a **custom
+  Polymarket market**. BankrBot has none of those rails: per
+  [docs.bankr.bot](https://docs.bankr.bot/features/polymarket/) it bets on **listed**
+  Polymarket markets only (search, bet, positions, redeem) and moves funds by
+  **transfer to a handle or address** — it does not deploy escrow contracts, create
+  multisigs, or create markets. Instructing it to do so told BankrBot to perform
+  actions it cannot execute. The social-bet model is now honest: **(1)** a listed
+  market first — the only trustless path; **(2)** otherwise a **trust-based side bet**
+  whose stakes sit with an agreed stake-holder via a BankrBot transfer, adjudicated
+  against the resolution statement and settled by a confirmed, human-issued transfer,
+  with the trust assumption stated up front; **(3)** if no market exists and no one
+  will hold the stakes, PolyRobin says the bet can't be run safely and stands down.
+  Updated the frontmatter description, the "What PolyRobin is (and isn't)" bullet, the
+  Social & Friend Bets section (path selection, tracking/settlement, worked example,
+  fairness rules), the example command, and the two social-bet edge cases. The
+  parsing, resolution statement, refusal of ambiguous/manipulable bets, objective-
+  source requirement, gate-5 confirmation, and bad-faith guard are unchanged — none of
+  that value depended on rails that don't exist.
 
 ## [1.2.0] — 2026-07-17
 
