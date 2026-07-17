@@ -2,7 +2,7 @@
 name: PolyRobin
 description: A safety-first prediction-market co-pilot for Polymarket and Robinhood Chain, used by tagging @bankrbot on X (he replies to you on X) — it builds independent probability estimates, only surfaces real edges with transparent math, applies strict risk gates, turns natural-language social & friend bets into fair verifiable wagers, and guides execution through BankrBot's existing rails — an analyst that can guide execution, never a black-box trader.
 tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, social-bets, friend-bets, risk-management, bankrbot]
-version: 1.1.0
+version: 1.2.0
 visibility: public
 author: PolyRobin Labs
 license: MIT
