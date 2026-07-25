@@ -4,7 +4,7 @@ description: A safety-first prediction-market co-pilot for Polymarket and Robinh
 tags: [prediction-markets, polymarket, robinhood-chain, meridian-predict, social-bets, friend-bets, risk-management, bankrbot]
 version: 1.2.1
 visibility: public
-author: PolyRobin Labs
+author: Phantom Capital
 license: MIT
 ---
 
