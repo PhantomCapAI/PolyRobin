@@ -268,10 +268,8 @@ consistent, and report vulnerabilities privately per [SECURITY.md](./SECURITY.md
 |---|---|
 | **Ticker** | PR |
 | **Chain** | Robinhood Chain |
-| **Contract (PR)** | `0x7fa0adced2b6d0d4bc2e41566829054b0f8f2ba3` |
+| **Contract (PR)** | To be announced — pending on-chain verification |
 | **Pair** | PR / WETH |
-| **Live price & charts** | [GeckoTerminal](https://www.geckoterminal.com/robinhood/pools/0x15e9866f3a0b29ac78dbbdcfa409e436a2194b67ae4601d80aa4a6fd9a085421) |
-| **Trade / info** | [Bankr](https://bankr.bot/terminal/discover/0x7fa0adced2b6d0d4bc2e41566829054b0f8f2ba3) |
 
 The token is **separate from the skill's logic** — PolyRobin's analysis, safety
 gates, and execution guidance work identically whether or not you hold it. **Not
